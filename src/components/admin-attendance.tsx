@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import {
-  TONES,
   buildAttendance,
   dayLabel,
   recordsToCsv,
@@ -10,13 +9,7 @@ import {
   type Status,
 } from "@/lib/frames";
 
-const CHIP: { [k in Status]: string } = {
-  early: "bg-early text-early-foreground",
-  ontime: "bg-ontime text-ontime-foreground",
-  late: "bg-late text-late-foreground",
-};
-
-const CHIP_LABEL: { [k in Status]: string } = {
+const STATUS_LABEL: { [k in Status]: string } = {
   early: "Early",
   ontime: "On time",
   late: "Late",
@@ -30,6 +23,8 @@ export function download(name: string, text: string, type: string) {
   a.click();
   URL.revokeObjectURL(url);
 }
+
+const cell = "border border-border px-4 py-3 align-top";
 
 export function AdminAttendance({
   records,
@@ -51,35 +46,28 @@ export function AdminAttendance({
         </button>
       </div>
       {days.length === 0 ? (
-        <p className="text-2xl font-bold text-muted-foreground">No sign-ins recorded yet.</p>
+        <p className="text-xl font-bold text-muted-foreground">No sign-ins recorded yet.</p>
       ) : (
         days.map((d) => (
           <section key={d.day} className="w-full max-w-5xl">
             <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-              <h2 className="text-2xl font-bold">{dayLabel(d.day)}</h2>
-              <p className="text-base font-semibold text-muted-foreground">
+              <h2 className="text-xl font-bold">{dayLabel(d.day)}</h2>
+              <p className="text-sm font-semibold text-muted-foreground">
                 {d.signedIn} of {d.total} sign-ins
               </p>
             </div>
 
-            <div className="mt-4 overflow-x-auto rounded-2xl border border-border">
-              <table className="w-full border-collapse text-left">
+            <div className="mt-3 overflow-x-auto">
+              <table className="w-full border-collapse border border-border text-left text-sm">
                 <thead>
                   <tr className="bg-muted">
-                    <th
-                      scope="col"
-                      className="px-5 py-4 text-sm font-bold uppercase text-muted-foreground"
-                    >
+                    <th scope="col" className={`${cell} font-bold`}>
                       Student
                     </th>
                     {d.frames.map((f) => (
-                      <th key={f.period.id} scope="col" className="px-5 py-4">
-                        <span
-                          className={`inline-block rounded-full px-3 py-1 text-base font-bold border-2 border-current ${TONES[f.period.tone].chip}`}
-                        >
-                          {f.period.emoji} {f.period.frame}
-                        </span>
-                        <span className="mt-1 block text-sm font-medium text-muted-foreground">
+                      <th key={f.period.id} scope="col" className={cell}>
+                        <span className="block font-bold">{f.period.frame}</span>
+                        <span className="block font-normal text-muted-foreground">
                           {windowLabel(f.period)}
                         </span>
                       </th>
@@ -88,29 +76,30 @@ export function AdminAttendance({
                 </thead>
                 <tbody>
                   {students.map((student, i) => (
-                    <tr key={student} className="border-t border-border">
-                      <th scope="row" className="px-5 py-4 text-lg font-bold">
+                    <tr key={student}>
+                      <th scope="row" className={`${cell} font-bold`}>
                         {student}
                       </th>
                       {d.frames.map((f) => {
                         const rec = f.rows[i]?.rec;
+                        const status = rec ? recordStatus(rec) : null;
                         return (
-                          <td key={f.period.id} className="px-5 py-4">
-                            {rec ? (
-                              <span className="flex flex-col items-start gap-1">
+                          <td key={f.period.id} className={cell}>
+                            {rec && status ? (
+                              <>
+                                <span className="block tabular-nums">{rec.at}</span>
                                 <span
-                                  className={`rounded-full px-3 py-1 text-sm font-bold ${CHIP[recordStatus(rec)]}`}
+                                  className={
+                                    status === "late"
+                                      ? "block font-bold text-destructive"
+                                      : "block text-muted-foreground"
+                                  }
                                 >
-                                  {CHIP_LABEL[recordStatus(rec)]}
+                                  {STATUS_LABEL[status]}
                                 </span>
-                                <span className="text-base font-semibold tabular-nums">
-                                  {rec.at}
-                                </span>
-                              </span>
+                              </>
                             ) : (
-                              <span className="text-base font-semibold text-muted-foreground">
-                                Not signed in
-                              </span>
+                              <span className="text-muted-foreground">Not signed in</span>
                             )}
                           </td>
                         );
@@ -119,16 +108,13 @@ export function AdminAttendance({
                   ))}
                 </tbody>
                 <tfoot>
-                  <tr className="border-t border-border bg-muted">
-                    <th scope="row" className="px-5 py-3 text-sm font-bold text-muted-foreground">
+                  <tr className="bg-muted">
+                    <th scope="row" className={`${cell} font-bold`}>
                       Totals
                     </th>
                     {d.frames.map((f) => (
-                      <td
-                        key={f.period.id}
-                        className="px-5 py-3 text-sm font-semibold text-muted-foreground"
-                      >
-                        {f.counts.early + f.counts.ontime} on time · {f.counts.late} late ·{" "}
+                      <td key={f.period.id} className={`${cell} text-muted-foreground`}>
+                        {f.counts.early + f.counts.ontime} on time, {f.counts.late} late,{" "}
                         {f.counts.missing} missing
                       </td>
                     ))}
@@ -140,8 +126,8 @@ export function AdminAttendance({
         ))
       )}
       <p className="max-w-5xl text-center text-sm text-muted-foreground">
-        Times come from this device&apos;s clock. Sign-ins are saved in this browser only, so use
-        the Backup tab to keep a copy.
+        Times come from this device's clock. Sign-ins are saved in this browser only, so use the
+        Backup tab to keep a copy.
       </p>
     </div>
   );

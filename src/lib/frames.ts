@@ -255,7 +255,7 @@ export function mergeBackup(
   };
 }
 
-export const windowLabel = (p: Period) => `${fmt(p.start)} → ${fmt(p.end)}`;
+export const windowLabel = (p: Period) => `${fmt(p.start)} to ${fmt(p.end)}`;
 
 // Hand angles in degrees (0 = 12 o'clock, clockwise) for a time in minutes since midnight.
 // Fractional minutes move the hour and minute hands smoothly; the second hand follows the seconds.
