@@ -5,6 +5,7 @@ import { AdminBackup } from "@/components/admin-backup";
 import { AdminPassword } from "@/components/admin-password";
 import { AdminStudents } from "@/components/admin-students";
 import {
+  backupDue,
   hashPassword,
   isUnlocked,
   loadArchived,
@@ -41,6 +42,7 @@ function Admin() {
   const [records, setRecords] = useState<{ [k: string]: SignIn }>({});
   const [students, setStudents] = useState<string[]>([]);
   const [archived, setArchived] = useState<string[]>([]);
+  const [due, setDue] = useState(false);
 
   useEffect(() => {
     if (isUnlocked(sessionStorage.getItem("teacher-ok"))) setOk(true);
@@ -53,6 +55,7 @@ function Admin() {
     setRecords(loadRecords());
     setStudents(loadStudents());
     setArchived(loadArchived());
+    setDue(backupDue());
     const touch = () => sessionStorage.setItem("teacher-ok", String(Date.now()));
     const check = () => {
       if (!isUnlocked(sessionStorage.getItem("teacher-ok"))) lock();
@@ -156,7 +159,21 @@ function Admin() {
                 No password yet? The first one you type here becomes the password.
               </p>
             </form>
-          ) : tab === "attendance" ? (
+          ) : null}
+          {ok && due && tab !== "backup" && (
+            <div className="flex w-full max-w-5xl flex-wrap items-center justify-between gap-3 rounded-2xl border-4 border-frame bg-card px-5 py-4">
+              <p className="text-base font-bold">
+                It has been a week since the last backup. Please back up the data.
+              </p>
+              <button
+                onClick={() => setTab("backup")}
+                className="rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground"
+              >
+                Go to Backup
+              </button>
+            </div>
+          )}
+          {!ok ? null : tab === "attendance" ? (
             <AdminAttendance records={records} students={students} />
           ) : tab === "students" ? (
             <AdminStudents
@@ -174,6 +191,7 @@ function Admin() {
               students={students}
               archived={archived}
               records={records}
+              onBackedUp={() => setDue(false)}
               onRestore={(s, a, r) => {
                 setStudents(s);
                 setArchived(a);

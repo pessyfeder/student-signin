@@ -1,9 +1,14 @@
 import { useMemo } from "react";
 import {
+  beforeEndLabel,
   buildAttendance,
+  earliestArrivals,
   dayLabel,
+  fmt,
+  PERIODS,
   recordsToCsv,
   recordStatus,
+  weekStart,
   windowLabel,
   type SignIn,
   type Status,
@@ -35,6 +40,18 @@ export function AdminAttendance({
 }) {
   const days = useMemo(() => buildAttendance(records, students), [records, students]);
 
+  // Days are newest first; group them into Sunday to Saturday weeks.
+  const weeks = useMemo(() => {
+    const out: { start: string; days: typeof days }[] = [];
+    for (const d of days) {
+      const start = weekStart(d.day);
+      const last = out[out.length - 1];
+      if (last && last.start === start) last.days.push(d);
+      else out.push({ start, days: [d] });
+    }
+    return out;
+  }, [days]);
+
   return (
     <div className="flex w-full flex-col items-center gap-8">
       <div className="flex w-full max-w-5xl justify-end">
@@ -48,81 +65,137 @@ export function AdminAttendance({
       {days.length === 0 ? (
         <p className="text-xl font-bold text-muted-foreground">No sign-ins recorded yet.</p>
       ) : (
-        days.map((d) => (
-          <section key={d.day} className="w-full max-w-5xl">
-            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-              <h2 className="text-xl font-bold">{dayLabel(d.day)}</h2>
-              <p className="text-sm font-semibold text-muted-foreground">
-                {d.signedIn} of {d.total} sign-ins
+        weeks.map((w) => (
+          <div key={w.start} className="flex w-full max-w-5xl flex-col gap-8">
+            <section>
+              <h2 className="text-xl font-bold">Week of {dayLabel(w.start)}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Earliest sign-in this week for each window, compared with the window's end time.
               </p>
-            </div>
-
-            <div className="mt-3 overflow-x-auto">
-              <table className="w-full border-collapse border border-border text-left text-sm">
-                <thead>
-                  <tr className="bg-muted">
-                    <th scope="col" className={`${cell} font-bold`}>
-                      Student
-                    </th>
-                    {d.frames.map((f) => (
-                      <th key={f.period.id} scope="col" className={cell}>
-                        <span className="block font-bold">{f.period.frame}</span>
-                        <span className="block font-normal text-muted-foreground">
-                          {windowLabel(f.period)}
-                        </span>
+              <div className="mt-3 overflow-x-auto">
+                <table className="w-full border-collapse border border-border text-left text-sm">
+                  <thead>
+                    <tr className="bg-muted">
+                      <th scope="col" className={`${cell} font-bold`}>
+                        Earliest arrival
                       </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {students.map((student, i) => (
-                    <tr key={student}>
-                      <th scope="row" className={`${cell} font-bold`}>
-                        {student}
-                      </th>
-                      {d.frames.map((f) => {
-                        const rec = f.rows[i]?.rec;
-                        const status = rec ? recordStatus(rec) : null;
-                        return (
-                          <td key={f.period.id} className={cell}>
-                            {rec && status ? (
+                      {PERIODS.map((p) => (
+                        <th key={p.id} scope="col" className={cell}>
+                          <span className="block font-bold">{p.frame}</span>
+                          <span className="block font-normal text-muted-foreground">
+                            Ends {fmt(p.end)}
+                          </span>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {earliestArrivals(
+                      records,
+                      students,
+                      w.days.map((d) => d.day),
+                    ).map((row) => (
+                      <tr key={row.student}>
+                        <th scope="row" className={`${cell} font-bold`}>
+                          {row.student}
+                        </th>
+                        {row.cells.map((c, i) => (
+                          <td key={PERIODS[i]!.id} className={cell}>
+                            {c ? (
                               <>
-                                <span className="block tabular-nums">{rec.at}</span>
-                                <span
-                                  className={
-                                    status === "late"
-                                      ? "block font-bold text-destructive"
-                                      : "block text-muted-foreground"
-                                  }
-                                >
-                                  {STATUS_LABEL[status]}
+                                <span className="block tabular-nums">{c.at}</span>
+                                <span className="block text-muted-foreground">
+                                  {beforeEndLabel(c.before)}
                                 </span>
                               </>
                             ) : (
-                              <span className="text-muted-foreground">Not signed in</span>
+                              <span className="text-muted-foreground">No sign-ins</span>
                             )}
                           </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr className="bg-muted">
-                    <th scope="row" className={`${cell} font-bold`}>
-                      Totals
-                    </th>
-                    {d.frames.map((f) => (
-                      <td key={f.period.id} className={`${cell} text-muted-foreground`}>
-                        {f.counts.early + f.counts.ontime} on time, {f.counts.late} late,{" "}
-                        {f.counts.missing} missing
-                      </td>
+                        ))}
+                      </tr>
                     ))}
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-          </section>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+            {w.days.map((d) => (
+              <section key={d.day}>
+                <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                  <h2 className="text-xl font-bold">{dayLabel(d.day)}</h2>
+                  <p className="text-sm font-semibold text-muted-foreground">
+                    {d.signedIn} of {d.total} sign-ins
+                  </p>
+                </div>
+
+                <div className="mt-3 overflow-x-auto">
+                  <table className="w-full border-collapse border border-border text-left text-sm">
+                    <thead>
+                      <tr className="bg-muted">
+                        <th scope="col" className={`${cell} font-bold`}>
+                          Student
+                        </th>
+                        {d.frames.map((f) => (
+                          <th key={f.period.id} scope="col" className={cell}>
+                            <span className="block font-bold">{f.period.frame}</span>
+                            <span className="block font-normal text-muted-foreground">
+                              {windowLabel(f.period)}
+                            </span>
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {students.map((student, i) => (
+                        <tr key={student}>
+                          <th scope="row" className={`${cell} font-bold`}>
+                            {student}
+                          </th>
+                          {d.frames.map((f) => {
+                            const rec = f.rows[i]?.rec;
+                            const status = rec ? recordStatus(rec) : null;
+                            return (
+                              <td key={f.period.id} className={cell}>
+                                {rec && status ? (
+                                  <>
+                                    <span className="block tabular-nums">{rec.at}</span>
+                                    <span
+                                      className={
+                                        status === "late"
+                                          ? "block font-bold text-destructive"
+                                          : "block text-muted-foreground"
+                                      }
+                                    >
+                                      {STATUS_LABEL[status]}
+                                    </span>
+                                  </>
+                                ) : (
+                                  <span className="text-muted-foreground">Not signed in</span>
+                                )}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="bg-muted">
+                        <th scope="row" className={`${cell} font-bold`}>
+                          Totals
+                        </th>
+                        {d.frames.map((f) => (
+                          <td key={f.period.id} className={`${cell} text-muted-foreground`}>
+                            {f.counts.early + f.counts.ontime} on time, {f.counts.late} late,{" "}
+                            {f.counts.missing} missing
+                          </td>
+                        ))}
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </section>
+            ))}
+          </div>
         ))
       )}
       <p className="max-w-5xl text-center text-sm text-muted-foreground">

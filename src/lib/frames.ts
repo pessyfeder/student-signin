@@ -205,6 +205,31 @@ export function recordsToCsv(records: { [k: string]: SignIn }) {
   return ["Date,Window,Student,Time,Status", ...lines].join("\n") + "\n";
 }
 
+const LAST_BACKUP_KEY = "signin-last-backup";
+const BACKUP_SINCE_KEY = "signin-backup-since";
+export const BACKUP_EVERY_MS = 7 * 24 * 60 * 60 * 1000;
+
+// A weekly reminder is due once a week has passed since the last backup (or, if there has never
+// been one, since the app was first opened in Admin).
+export function isBackupDue(last: string | null, since: string | null, now: number = Date.now()) {
+  const t = Number(last) || Number(since);
+  return t > 0 && now - t >= BACKUP_EVERY_MS;
+}
+
+export function markBackedUp(now: number = Date.now()) {
+  localStorage.setItem(LAST_BACKUP_KEY, String(now));
+}
+
+export function lastBackupTime(): number | null {
+  return Number(localStorage.getItem(LAST_BACKUP_KEY)) || null;
+}
+
+export function backupDue() {
+  if (!localStorage.getItem(BACKUP_SINCE_KEY))
+    localStorage.setItem(BACKUP_SINCE_KEY, String(Date.now()));
+  return isBackupDue(localStorage.getItem(LAST_BACKUP_KEY), localStorage.getItem(BACKUP_SINCE_KEY));
+}
+
 // Full backup (class list + every sign-in) as JSON, restorable from the Admin Backup tab.
 export function makeBackup(
   students: string[],
@@ -344,6 +369,56 @@ export function buildAttendance(
     const total = frames.reduce((s, f) => s + f.rows.length, 0);
     return { day, frames, signedIn, total };
   });
+}
+
+// Minutes since midnight from a saved time label such as "10:05 AM" (or "10:05" on a 24-hour clock).
+export function recordMinutes(rec: SignIn): number | null {
+  const m = /(\d{1,2}):(\d{2})\s*([AP]M)?/i.exec(rec.at ?? "");
+  if (!m) return null;
+  let h = Number(m[1]);
+  const mm = Number(m[2]);
+  const ap = m[3]?.toUpperCase();
+  if (ap === "PM" && h < 12) h += 12;
+  if (ap === "AM" && h === 12) h = 0;
+  return h * 60 + mm;
+}
+
+// Weeks run Sunday to Saturday. Returns the Sunday of the week containing the day.
+export function weekStart(day: string) {
+  const d = new Date(day);
+  if (Number.isNaN(d.getTime())) return day;
+  d.setDate(d.getDate() - d.getDay());
+  return d.toDateString();
+}
+
+export type EarliestCell = { at: string; before: number } | null;
+
+// For each student and window: the sign-in that came closest to (or furthest before) the window's
+// end time across the given days. "before" is whole minutes before the end time (negative = after).
+export function earliestArrivals(
+  records: { [k: string]: SignIn },
+  students: string[],
+  days: string[],
+): { student: string; cells: EarliestCell[] }[] {
+  return students.map((student) => ({
+    student,
+    cells: PERIODS.map((period) => {
+      let best: EarliestCell = null;
+      for (const day of days) {
+        const rec = records[`${day}|${period.id}|${student}`];
+        const m = rec ? recordMinutes(rec) : null;
+        if (rec && m !== null && (!best || period.end - m > best.before))
+          best = { at: rec.at ?? "", before: period.end - m };
+      }
+      return best;
+    }),
+  }));
+}
+
+export function beforeEndLabel(before: number) {
+  if (before > 0) return `${before} min before end`;
+  if (before === 0) return "At end time";
+  return `${-before} min after end`;
 }
 
 export function dayLabel(day: string) {

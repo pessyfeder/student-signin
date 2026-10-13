@@ -2,6 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import {
   AUTO_LOCK_MS,
+  BACKUP_EVERY_MS,
+  isBackupDue,
+  earliestArrivals,
+  recordMinutes,
+  weekStart,
   PERIODS,
   isUnlocked,
   recordsToCsv,
@@ -129,5 +134,49 @@ describe("recordsToCsv", () => {
         "2026-10-12,Good Morning,Hindy Fisch,10:07 AM,early\n" +
         "2026-10-12,After Yiddish Recess,Esty Oberlander,11:40 AM,late\n",
     );
+  });
+});
+
+describe("isBackupDue", () => {
+  const now = 10 * BACKUP_EVERY_MS;
+  it("is not due within a week of the last backup", () => {
+    expect(isBackupDue(String(now - BACKUP_EVERY_MS + 1), null, now)).toBe(false);
+  });
+  it("is due a week after the last backup", () => {
+    expect(isBackupDue(String(now - BACKUP_EVERY_MS), null, now)).toBe(true);
+  });
+  it("counts from first use when there has never been a backup", () => {
+    expect(isBackupDue(null, String(now - 2 * 24 * 60 * 60 * 1000), now)).toBe(false);
+    expect(isBackupDue(null, String(now - BACKUP_EVERY_MS), now)).toBe(true);
+  });
+  it("is not due when nothing is recorded", () => expect(isBackupDue(null, null, now)).toBe(false));
+});
+
+describe("weekly earliest arrival", () => {
+  it("reads minutes from a saved time label", () => {
+    expect(recordMinutes({ text: "", late: false, at: "10:05 AM" })).toBe(605);
+    expect(recordMinutes({ text: "", late: false, at: "3:26 PM" })).toBe(926);
+    expect(recordMinutes({ text: "", late: false, at: "12:01 PM" })).toBe(721);
+    expect(recordMinutes({ text: "", late: false })).toBeNull();
+  });
+  it("starts weeks on Sunday", () => {
+    expect(weekStart("Wed Oct 14 2026")).toBe("Sun Oct 11 2026");
+    expect(weekStart("Sun Oct 11 2026")).toBe("Sun Oct 11 2026");
+    expect(weekStart("Sat Oct 17 2026")).toBe("Sun Oct 11 2026");
+  });
+  it("keeps the arrival furthest before the end time", () => {
+    const rec = (at: string) => ({ text: "", late: false, at });
+    const records = {
+      "Mon Oct 12 2026|arrival|Hindy": rec("10:10 AM"),
+      "Tue Oct 13 2026|arrival|Hindy": rec("10:02 AM"),
+      "Wed Oct 14 2026|arrival|Hindy": rec("10:20 AM"),
+    };
+    const [row] = earliestArrivals(
+      records,
+      ["Hindy"],
+      ["Mon Oct 12 2026", "Tue Oct 13 2026", "Wed Oct 14 2026"],
+    );
+    expect(row?.cells[0]).toEqual({ at: "10:02 AM", before: 13 });
+    expect(row?.cells[1]).toBeNull();
   });
 });

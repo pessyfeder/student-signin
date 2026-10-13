@@ -1,7 +1,9 @@
 import { useRef, useState, type ChangeEvent } from "react";
 import { download } from "@/components/admin-attendance";
 import {
+  lastBackupTime,
   makeBackup,
+  markBackedUp,
   mergeBackup,
   saveArchived,
   saveRecords,
@@ -16,14 +18,23 @@ export function AdminBackup({
   archived,
   records,
   onRestore,
+  onBackedUp,
 }: {
   students: string[];
   archived: string[];
   records: Records;
   onRestore: (students: string[], archived: string[], records: Records) => void;
+  onBackedUp: () => void;
 }) {
   const [msg, setMsg] = useState("");
   const [bad, setBad] = useState(false);
+  const [last, setLast] = useState<number | null>(lastBackupTime);
+
+  function backedUp() {
+    markBackedUp();
+    setLast(lastBackupTime());
+    onBackedUp();
+  }
 
   function save() {
     const d = new Date();
@@ -33,6 +44,7 @@ export function AdminBackup({
       makeBackup(students, records, archived),
       "application/json",
     );
+    backedUp();
     setBad(false);
     setMsg("Backup downloaded");
   }
@@ -69,6 +81,7 @@ export function AdminBackup({
     setPasted(text);
     try {
       await navigator.clipboard.writeText(text);
+      backedUp();
       setBad(false);
       setMsg("Data copied. Paste it into a file or onto another device");
     } catch {
@@ -85,6 +98,18 @@ export function AdminBackup({
   return (
     <div className="w-full max-w-2xl rounded-2xl border border-border bg-card p-5">
       <h2 className="text-lg font-bold">Backup</h2>
+      <p className="mt-1 text-sm font-semibold">
+        Last backup:{" "}
+        {last
+          ? new Date(last).toLocaleDateString([], {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })
+          : "never"}
+        . A reminder appears in Admin once a week.
+      </p>
       <p className="mt-2 text-sm text-muted-foreground">
         Everything is saved in this browser only. Download a backup file, or copy the data as text,
         to keep a copy of the student list and all sign-ins.
