@@ -74,15 +74,11 @@ function Attendance() {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden flex flex-col items-center px-6 py-10 gap-8">
-      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 wash-rainbow">
-        <span className="absolute -left-20 top-6 h-64 w-64 rounded-full opacity-30 blur-3xl drift-a grad-morning" />
-        <span className="absolute -right-16 top-1/3 h-72 w-72 rounded-full opacity-25 blur-3xl drift-b grad-recess" />
-        <span className="absolute left-1/3 -bottom-24 h-80 w-80 rounded-full opacity-25 blur-3xl drift-c grad-lunch" />
-      </div>
+    <main className="relative min-h-screen flex flex-col items-center px-6 py-10 gap-8">
+      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 wash-rainbow" />
 
       <header className="text-center">
-        <div className="inline-block px-10 py-4 rounded-[2.5rem] shine grad-rainbow glow-rainbow">
+        <div className="inline-block px-10 py-4 rounded-[2.5rem] grad-rainbow glow-rainbow">
           <span className="inline-block text-5xl sm:text-6xl font-black tracking-tight badge-ink">
             Attendance
           </span>
@@ -93,7 +89,7 @@ function Attendance() {
       </header>
 
       {!checked ? null : !ok ? (
-        <form onSubmit={submit} className="w-full max-w-md rounded-3xl border border-border bg-card p-7 shadow-lg">
+        <form onSubmit={submit} className="w-full max-w-md rounded-3xl border border-border bg-card p-7">
           <label htmlFor="teacher-pw" className="block text-2xl font-black">
             Teacher password
           </label>
@@ -101,7 +97,6 @@ function Attendance() {
             id="teacher-pw"
             type="password"
             value={pw}
-            autoFocus
             onChange={(e) => {
               setPw(e.target.value);
               setErr("");
@@ -112,7 +107,7 @@ function Attendance() {
           {err && <p className="mt-3 text-lg font-bold text-destructive">{err}</p>}
           <button
             type="submit"
-            className="mt-4 w-full rounded-2xl grad-ontime glow-ontime px-4 py-3 text-xl font-bold text-bright transition active:scale-95"
+            className="mt-4 w-full rounded-2xl grad-ontime glow-ontime px-4 py-3 text-xl font-bold text-bright"
           >
             Show attendance
           </button>
@@ -136,7 +131,7 @@ function Attendance() {
               {d.frames.map((f) => {
                 const tone = TONES[f.period.tone];
                 return (
-                  <div key={f.period.id} className="rounded-3xl border border-border bg-card p-5 shadow-lg">
+                  <div key={f.period.id} className="rounded-3xl border border-border bg-card p-5">
                     <span className={`inline-block rounded-full px-4 py-1.5 text-xl font-black text-bright ${tone.badge}`}>
                       {f.period.frame}
                     </span>

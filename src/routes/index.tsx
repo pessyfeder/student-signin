@@ -29,8 +29,6 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const isEarly = (n: number, start: number) => n < start;
-
 function Index() {
   const [now, setNow] = useState<Date | null>(null);
   const [enabled, setEnabled] = useState(false);
@@ -69,7 +67,7 @@ function Index() {
     const first = name.split(" ")[0];
     let detail: string;
     let status: Status;
-    if (isEarly(n, period.start)) {
+    if (n < period.start) {
       detail = `You signed in ${Math.ceil(period.start - n)} min early`;
       status = "early";
     } else if (!isLate) {
@@ -93,20 +91,16 @@ function Index() {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden flex flex-col items-center px-6 py-8 gap-7">
-      <div aria-hidden className={`pointer-events-none fixed inset-0 -z-10 ${tone.wash}`}>
-        <span className={`absolute -left-20 top-6 h-64 w-64 rounded-full opacity-35 blur-3xl drift-a ${tone.bubble}`} />
-        <span className={`absolute -right-16 top-1/3 h-72 w-72 rounded-full opacity-30 blur-3xl drift-b ${tone.bubble}`} />
-        <span className={`absolute left-1/3 -bottom-24 h-80 w-80 rounded-full opacity-25 blur-3xl drift-c ${tone.bubble}`} />
-      </div>
+    <main className="relative min-h-screen flex flex-col items-center px-6 py-8 gap-7">
+      <div aria-hidden className={`pointer-events-none fixed inset-0 -z-10 ${tone.wash}`} />
 
       <header className="text-center">
         <p className={`text-8xl sm:text-9xl font-black tabular-nums leading-none ${tone.clock}`}>
           {now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
         </p>
         <p className="mt-7 text-sm font-extrabold uppercase tracking-[0.4em] text-foreground/70">Right now</p>
-        <div key={period.frame} className={`mt-3 inline-block px-10 py-5 rounded-[2.5rem] shine pop-in ${tone.badge}`}>
-          <span className="bob inline-block text-6xl sm:text-7xl font-black tracking-tight badge-ink">
+        <div className={`mt-3 inline-block px-10 py-5 rounded-[2.5rem] ${tone.badge}`}>
+          <span className="inline-block text-6xl sm:text-7xl font-black tracking-tight badge-ink">
             {period.frame}
           </span>
         </div>
@@ -117,7 +111,7 @@ function Index() {
       </header>
 
       {msg && (
-        <div className={`w-full max-w-4xl rounded-3xl p-8 text-center text-5xl font-bold pop-in ${msg.late ? "grad-late glow-late text-late-foreground" : "grad-ontime glow-ontime text-ontime-foreground"}`}>
+        <div className={`w-full max-w-4xl rounded-3xl p-8 text-center text-5xl font-bold ${msg.late ? "grad-late glow-late text-late-foreground" : "grad-ontime glow-ontime text-ontime-foreground"}`}>
           {msg.text}
         </div>
       )}
@@ -131,7 +125,7 @@ function Index() {
               key={s}
               disabled={!enabled || !!rec}
               onClick={() => signIn(s)}
-              className={`flex-1 min-w-0 rounded-2xl px-3 py-5 text-xl font-bold transition active:scale-95 disabled:opacity-60 ${late ? "grad-late glow-late text-late-foreground" : "grad-ontime glow-ontime text-ontime-foreground"}`}
+              className={`flex-1 min-w-0 rounded-2xl px-3 py-5 text-xl font-bold disabled:opacity-60 ${late ? "grad-late glow-late text-late-foreground" : "grad-ontime glow-ontime text-ontime-foreground"}`}
             >
               {s}
               {rec && (

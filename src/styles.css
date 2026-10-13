@@ -257,40 +257,22 @@
 }
 
 
-@utility shine {
-  position: relative;
-  overflow: hidden;
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(105deg, transparent 42%, oklch(1 0 0 / 42%) 50%, transparent 58%);
-    background-size: 260% 100%;
-    animation: shine-sweep 5s linear infinite;
-  }
+/* ---- extra colours (static, no motion) ---- */
+:root {
+  --early: oklch(0.72 0.14 250);
+  --early-deep: oklch(0.55 0.17 265);
+  --gradient-early: linear-gradient(140deg, var(--early), var(--early-deep));
+  --gradient-rainbow: linear-gradient(115deg, var(--badge-morning-a), var(--badge-recess-a) 50%, var(--badge-lunch-a));
+  --wash-rainbow:
+    radial-gradient(55% 45% at 12% 4%, color-mix(in oklab, var(--morning-1) 60%, transparent), transparent 70%),
+    radial-gradient(45% 40% at 88% 8%, color-mix(in oklab, var(--recess-1) 55%, transparent), transparent 72%),
+    radial-gradient(65% 55% at 50% 100%, color-mix(in oklab, var(--lunch-1) 45%, transparent), transparent 75%);
 }
 
-@utility pop-in { animation: pop-in 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.4) both; }
-@utility bob { animation: bob 6s ease-in-out infinite; }
-@utility drift-a { animation: drift 16s ease-in-out infinite alternate; }
-@utility drift-b { animation: drift 22s ease-in-out infinite alternate-reverse; }
-@utility drift-c { animation: drift 12s ease-in-out infinite alternate; }
+@utility grad-early { background-image: var(--gradient-early); }
+@utility glow-early { box-shadow: 0 16px 38px -16px color-mix(in oklab, var(--early) 65%, transparent); }
+@utility grad-rainbow { background-image: var(--gradient-rainbow); }
+@utility glow-rainbow { box-shadow: 0 22px 55px -18px color-mix(in oklab, var(--badge-lunch-a) 55%, transparent); }
+@utility wash-rainbow { background-image: var(--wash-rainbow); }
 
-@keyframes shine-sweep {
-  from { background-position: 200% 0; }
-  to { background-position: -80% 0; }
-}
-@keyframes pop-in {
-  0% { transform: scale(0.86) translateY(10px); opacity: 0; }
-  60% { transform: scale(1.04) translateY(0); opacity: 1; }
-  100% { transform: scale(1) translateY(0); opacity: 1; }
-}
-@keyframes bob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-@keyframes drift {
-  0% { transform: translate3d(0, 0, 0) scale(1); }
-  100% { transform: translate3d(2.5rem, -2.5rem, 0) scale(1.18); }
-}
 
