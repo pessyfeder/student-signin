@@ -17,17 +17,28 @@ const [arrival, recess, lunch] = PERIODS;
 
 describe("currentPeriod", () => {
   it("is closed before 10:00", () => expect(currentPeriod(t(9, 59))).toBeNull());
-  it("closes at 3:00 PM and stays closed", () => {
-    expect(currentPeriod(t(14, 59))?.id).toBe("lunch");
-    expect(currentPeriod(t(15, 0))).toBeNull();
-    expect(currentPeriod(t(21, 12))).toBeNull();
-    expect(nextPeriod(t(15, 0))).toBeNull();
+  it("opens at each start time and closes after the end minute", () => {
+    const windows: [string, [number, number], [number, number]][] = [
+      ["arrival", [10, 0], [10, 15]],
+      ["recess", [12, 0], [12, 5]],
+      ["lunch", [13, 25], [13, 32]],
+      ["recess2", [15, 25], [15, 30]],
+    ];
+    for (const [id, [sh, sm], [eh, em]] of windows) {
+      expect(currentPeriod(t(sh, sm))?.id).toBe(id);
+      expect(currentPeriod(t(eh, em, 59))?.id).toBe(id);
+      expect(currentPeriod(t(eh, em + 1))).toBeNull();
+    }
   });
-  it("switches to the next window at its start time", () => {
-    expect(currentPeriod(t(10, 0))?.id).toBe("arrival");
-    expect(currentPeriod(t(11, 27))?.id).toBe("arrival");
-    expect(currentPeriod(t(11, 28))?.id).toBe("recess");
-    expect(currentPeriod(t(13, 25))?.id).toBe("lunch");
+  it("is closed between windows", () => {
+    expect(currentPeriod(t(11, 0))).toBeNull();
+    expect(currentPeriod(t(12, 6))).toBeNull();
+    expect(currentPeriod(t(14, 0))).toBeNull();
+  });
+  it("is closed after 3:30 PM and stays closed", () => {
+    expect(currentPeriod(t(15, 31))).toBeNull();
+    expect(currentPeriod(t(21, 12))).toBeNull();
+    expect(nextPeriod(t(15, 31))).toBeNull();
   });
 });
 
@@ -39,7 +50,7 @@ describe("evaluateSignIn", () => {
   });
   it("is on time at the cutoff minute", () => {
     expect(evaluateSignIn(arrival!, t(10, 15)).status).toBe("ontime");
-    expect(evaluateSignIn(recess!, t(11, 33, 0.5)).late).toBe(false);
+    expect(evaluateSignIn(recess!, t(12, 5, 0.5)).late).toBe(false);
     expect(evaluateSignIn(arrival!, t(10, 15, 59)).status).toBe("ontime");
     expect(evaluateSignIn(arrival!, t(10, 16, 0))).toMatchObject({ status: "late", minutes: 1 });
   });
@@ -48,7 +59,7 @@ describe("evaluateSignIn", () => {
     expect(r).toMatchObject({ status: "late", minutes: 5, late: true });
     expect(r.detail).toBe("You signed in 5 min late");
   });
-  it("uses the after-lunch cutoff of 1:30", () => {
+  it("uses the after-lunch cutoff of 1:32", () => {
     expect(evaluateSignIn(lunch!, t(13, 27)).status).toBe("early");
     expect(evaluateSignIn(lunch!, t(13, 40)).late).toBe(true);
   });
@@ -114,7 +125,7 @@ describe("recordsToCsv", () => {
     expect(csv).toBe(
       "Date,Window,Student,Time,Status\n" +
         "2026-10-12,Good Morning,Hindy Fisch,10:07 AM,early\n" +
-        "2026-10-12,After Recess,Esty Oberlander,11:40 AM,late\n",
+        "2026-10-12,After Yiddish Recess,Esty Oberlander,11:40 AM,late\n",
     );
   });
 });

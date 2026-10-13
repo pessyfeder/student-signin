@@ -16,7 +16,6 @@ import {
   loadStudents,
   mins,
   saveRecords,
-  windowLabel,
   type SignIn,
 } from "@/lib/frames";
 
@@ -120,7 +119,7 @@ function Index() {
             </p>
             <p className="mt-5 text-2xl font-medium text-muted-foreground">
               {period
-                ? `Sign-in ${windowLabel(period)}`
+                ? `Sign-in closes at ${fmt(period.end)}`
                 : upcoming
                   ? `Sign-in opens at ${fmt(upcoming.start)}`
                   : "Sign-in is closed"}

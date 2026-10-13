@@ -113,11 +113,11 @@ export const PERIODS: Period[] = [
   {
     id: "recess",
     greet: "Good day",
-    frame: "After Recess",
+    frame: "After Yiddish Recess",
     emoji: "⚽",
     tone: "recess",
-    start: 688,
-    end: 693,
+    start: 720,
+    end: 725,
   },
   {
     id: "lunch",
@@ -126,7 +126,16 @@ export const PERIODS: Period[] = [
     emoji: "🍎",
     tone: "lunch",
     start: 805,
-    end: 810,
+    end: 812,
+  },
+  {
+    id: "recess2",
+    greet: "Good day",
+    frame: "After English Recess",
+    emoji: "⚽",
+    tone: "recess",
+    start: 925,
+    end: 930,
   },
 ];
 
@@ -138,16 +147,10 @@ export const TONES: { [k in Tone]: { chip: string } } = {
 
 export const mins = (d: Date) => d.getHours() * 60 + d.getMinutes() + d.getSeconds() / 60;
 
-// End of the school day: sign-in closes for good (minutes since midnight, 3:00 PM).
-export const DAY_END = 900;
-
-// The window currently open for sign-in: the latest one that has started.
-// Before the first window starts, or from the end of the school day, there is none.
+// The window open for sign-in right now: from its start through the whole end minute
+// (10:15:59 still counts as 10:15). Between windows, and after the last one, there is none.
 export function currentPeriod(now: number): Period | null {
-  if (now >= DAY_END) return null;
-  let p: Period | null = null;
-  for (const x of PERIODS) if (now >= x.start) p = x;
-  return p;
+  return PERIODS.find((x) => now >= x.start && now < x.end + 1) ?? null;
 }
 
 export function nextPeriod(now: number): Period | null {
