@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { PERIODS, clockEmoji, currentPeriod, evaluateSignIn, nextPeriod } from "@/lib/frames";
+import { PERIODS, handAngles, currentPeriod, evaluateSignIn, nextPeriod } from "@/lib/frames";
 
 const t = (h: number, m: number, s = 0) => h * 60 + m + s / 60;
 const [arrival, recess, lunch] = PERIODS;
@@ -42,14 +42,11 @@ describe("evaluateSignIn", () => {
   });
 });
 
-describe("clockEmoji", () => {
-  it("shows the clock face for the nearest half hour", () => {
-    expect(clockEmoji(t(1, 0))).toBe("🕐");
-    expect(clockEmoji(t(10, 7))).toBe("🕙");
-    expect(clockEmoji(t(10, 20))).toBe("🕥");
-    expect(clockEmoji(t(12, 0))).toBe("🕛");
-    expect(clockEmoji(t(0, 10))).toBe("🕛");
-    expect(clockEmoji(t(13, 27))).toBe("🕜");
-    expect(clockEmoji(t(23, 50))).toBe("🕛");
+describe("handAngles", () => {
+  it("points the hands at the exact time", () => {
+    expect(handAngles(t(3, 0))).toEqual({ hour: 90, minute: 0 });
+    expect(handAngles(t(10, 20))).toEqual({ hour: 310, minute: 120 });
+    expect(handAngles(t(12, 0))).toEqual({ hour: 0, minute: 0 });
+    expect(handAngles(t(13, 30))).toEqual({ hour: 45, minute: 180 });
   });
 });
