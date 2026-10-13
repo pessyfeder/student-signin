@@ -24,6 +24,32 @@ export type SignIn = {
 
 export const STUDENTS = ["Hindy Fisch", "Mindy Katina", "Esty Oberlander"];
 
+const STUDENTS_KEY = "signin-students";
+
+// The class list: the built-in students plus any the teacher has added in this browser.
+export function loadStudents(): string[] {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STUDENTS_KEY) || "null");
+    if (Array.isArray(saved) && saved.every((s) => typeof s === "string")) return saved;
+  } catch {
+    // fall through to the default list
+  }
+  return [...STUDENTS];
+}
+
+export function saveStudents(list: string[]) {
+  localStorage.setItem(STUDENTS_KEY, JSON.stringify(list));
+}
+
+// Returns the updated list, or an error message when the name is empty or already on the list.
+export function addStudent(list: string[], raw: string): { list: string[] } | { error: string } {
+  const name = raw.trim().replace(/\s+/g, " ");
+  if (!name) return { error: "Please type a name" };
+  if (list.some((s) => s.toLowerCase() === name.toLowerCase()))
+    return { error: "That student is already on the list" };
+  return { list: [...list, name] };
+}
+
 // First name only; add the surname initial if another student shares the first name,
 // and the full name if the initial matches too.
 export function displayName(name: string, all: string[] = STUDENTS) {
@@ -200,7 +226,10 @@ export type AttendanceDay = {
   total: number;
 };
 
-export function buildAttendance(records: { [k: string]: SignIn }): AttendanceDay[] {
+export function buildAttendance(
+  records: { [k: string]: SignIn },
+  students: string[] = STUDENTS,
+): AttendanceDay[] {
   const days: string[] = [];
   for (const k of Object.keys(records)) {
     const d = k.split("|")[0] ?? "";
@@ -210,7 +239,7 @@ export function buildAttendance(records: { [k: string]: SignIn }): AttendanceDay
 
   return days.map((day) => {
     const frames: AttendanceFrame[] = PERIODS.map((period) => {
-      const rows: AttendanceRow[] = STUDENTS.map((student) => ({
+      const rows: AttendanceRow[] = students.map((student) => ({
         student,
         rec: records[`${day}|${period.id}|${student}`] ?? null,
       }));

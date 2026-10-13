@@ -6,7 +6,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   PERIODS,
-  STUDENTS,
   TONES,
   clockLabel,
   fmt,
@@ -16,6 +15,7 @@ import {
   nextPeriod,
   hashPassword,
   loadRecords,
+  loadStudents,
   mins,
   saveRecords,
   windowLabel,
@@ -42,9 +42,11 @@ function Index() {
   const [records, setRecords] = useState<{ [k: string]: SignIn }>({});
   const [msg, setMsg] = useState<SignIn | null>(null);
   const [pwOpen, setPwOpen] = useState(false);
+  const [students, setStudents] = useState<string[]>([]);
 
   useEffect(() => {
     setNow(new Date());
+    setStudents(loadStudents());
     setEnabled(localStorage.getItem("signin-enabled") === "1");
     setRecords(loadRecords());
     const t = setInterval(() => setNow(new Date()), 1000);
@@ -78,7 +80,7 @@ function Index() {
     if (!period || !now) return;
     const r = evaluateSignIn(period, n);
     const rec: SignIn = {
-      text: `${period.greet}, ${displayName(name)}! ${r.detail}.`,
+      text: `${period.greet}, ${displayName(name, students)}! ${r.detail}.`,
       late: r.late,
       at: clockLabel(now),
       status: r.status,
@@ -155,7 +157,7 @@ function Index() {
           </section>
 
           <div className="w-full max-w-4xl grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {STUDENTS.map((s) => {
+            {students.map((s) => {
               const rec = records[key(s)];
               const late = rec ? rec.late : isLate;
               return (
@@ -204,7 +206,7 @@ function Index() {
             <DialogPrimitive.Title className="mt-6 text-3xl sm:text-4xl font-semibold text-muted-foreground">
               {msg?.greet ?? "Hello"},
               <span className="mt-1 block text-5xl sm:text-7xl font-black text-foreground">
-                {msg?.name ? displayName(msg.name) : msg?.text}!
+                {msg?.name ? displayName(msg.name, students) : msg?.text}!
               </span>
             </DialogPrimitive.Title>
             {msg?.detail && (
