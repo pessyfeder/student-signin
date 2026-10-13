@@ -44,9 +44,13 @@ describe("evaluateSignIn", () => {
 
 describe("handAngles", () => {
   it("points the hands at the exact time", () => {
-    expect(handAngles(t(3, 0))).toEqual({ hour: 90, minute: 0 });
-    expect(handAngles(t(10, 20))).toEqual({ hour: 310, minute: 120 });
-    expect(handAngles(t(12, 0))).toEqual({ hour: 0, minute: 0 });
-    expect(handAngles(t(13, 30))).toEqual({ hour: 45, minute: 180 });
+    expect(handAngles(t(3, 0))).toEqual({ hour: 90, minute: 0, second: 0 });
+    expect(handAngles(t(10, 20))).toEqual({ hour: 310, minute: 120, second: 0 });
+    expect(handAngles(t(12, 0))).toEqual({ hour: 0, minute: 0, second: 0 });
+    expect(handAngles(t(13, 30))).toEqual({ hour: 45, minute: 180, second: 0 });
+  });
+  it("moves the second hand with the seconds", () => {
+    expect(handAngles(t(10, 20, 15)).second).toBe(90);
+    expect(handAngles(t(10, 20, 45)).second).toBe(270);
   });
 });

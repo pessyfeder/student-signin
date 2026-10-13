@@ -97,9 +97,13 @@ export function evaluateSignIn(period: Period, now: number): Result {
 export const windowLabel = (p: Period) => `${fmt(p.start)} → ${fmt(p.end)}`;
 
 // Hand angles in degrees (0 = 12 o'clock, clockwise) for a time in minutes since midnight.
+// Fractional minutes move the hour and minute hands smoothly; the second hand follows the seconds.
 export function handAngles(m: number) {
-  const whole = Math.floor(m);
-  return { hour: ((whole / 60) % 12) * 30, minute: (whole % 60) * 6 };
+  return {
+    hour: ((m / 60) % 12) * 30,
+    minute: (m % 60) * 6,
+    second: (Math.round((m * 60) % 60) * 6) % 360,
+  };
 }
 
 export function fmt(m: number) {
