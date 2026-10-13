@@ -179,3 +179,15 @@
   --color-lunch: var(--lunch);
   --color-lunch-ink: var(--lunch-ink);
 }
+
+/* ---- borders ---- */
+:root {
+  --ontime-border: oklch(0.42 0.14 150);
+  --late-border: oklch(0.4 0.17 27);
+  --frame: oklch(0.3 0.04 265);
+}
+@theme inline {
+  --color-ontime-border: var(--ontime-border);
+  --color-late-border: var(--late-border);
+  --color-frame: var(--frame);
+}

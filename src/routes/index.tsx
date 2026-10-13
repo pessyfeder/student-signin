@@ -95,75 +95,79 @@ function Index() {
   }
 
   const solid = (late: boolean) =>
-    late ? "bg-late text-late-foreground" : "bg-ontime text-ontime-foreground";
+    late
+      ? "border-4 border-late-border bg-late text-late-foreground"
+      : "border-4 border-ontime-border bg-ontime text-ontime-foreground";
 
   return (
-    <main className="min-h-screen bg-background text-foreground flex flex-col">
-      <header className="flex items-center justify-between gap-4 border-b border-border px-6 py-4">
-        <h1 className="text-lg font-bold">Class Sign-In</h1>
-        <nav className="flex items-center gap-5 text-sm font-semibold">
-          <Link to="/attendance" className="text-muted-foreground hover:text-foreground">
-            View attendance
-          </Link>
-          <button onClick={toggle} className="text-muted-foreground hover:text-foreground">
-            {enabled ? "Disable sign-in" : "Enable sign-in"}
-          </button>
-        </nav>
-      </header>
+    <main className="min-h-screen bg-muted p-3 sm:p-5 text-foreground">
+      <div className="flex min-h-[calc(100vh-1.5rem)] sm:min-h-[calc(100vh-2.5rem)] flex-col overflow-hidden rounded-3xl border-4 border-frame bg-background">
+        <header className="flex items-center justify-between gap-4 border-b border-border px-6 py-4">
+          <h1 className="text-lg font-bold">Class Sign-In</h1>
+          <nav className="flex items-center gap-5 text-sm font-semibold">
+            <Link to="/attendance" className="text-muted-foreground hover:text-foreground">
+              View attendance
+            </Link>
+            <button onClick={toggle} className="text-muted-foreground hover:text-foreground">
+              {enabled ? "Disable sign-in" : "Enable sign-in"}
+            </button>
+          </nav>
+        </header>
 
-      <div className="flex-1 flex flex-col items-center justify-center gap-10 px-6 py-10">
-        <section className="text-center">
-          <div className="flex justify-center">
-            <AnalogClock minutes={n} />
-          </div>
-          <p className="mt-4 text-8xl sm:text-9xl font-black tabular-nums leading-none">
-            {now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
-          </p>
-          <p
-            className={`mt-8 inline-flex items-center gap-6 rounded-3xl px-10 py-4 text-6xl sm:text-7xl font-black tracking-tight ${tone.chip}`}
-          >
-            <span aria-hidden className="text-7xl sm:text-8xl leading-none">
-              {period ? period.emoji : "🔒"}
-            </span>
-            {period ? period.frame : "Sign-in closed"}
-            <span aria-hidden className="text-7xl sm:text-8xl leading-none">
-              {period ? period.emoji : "🔒"}
-            </span>
-          </p>
-          <p className="mt-5 text-2xl font-medium text-muted-foreground">
-            {period
-              ? `Sign-in ${windowLabel(period)}`
-              : upcoming
-                ? `Sign-in opens at ${fmt(upcoming.start)}`
-                : "Sign-in is closed"}
-          </p>
-          {!enabled && (
-            <p className="mt-2 text-lg font-semibold text-muted-foreground">
-              Sign-in is turned off by the teacher
+        <div className="flex-1 flex flex-col items-center justify-center gap-10 px-6 py-10">
+          <section className="text-center">
+            <div className="flex justify-center">
+              <AnalogClock minutes={n} />
+            </div>
+            <p className="mt-4 text-8xl sm:text-9xl font-black tabular-nums leading-none">
+              {now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
             </p>
-          )}
-        </section>
+            <p
+              className={`mt-8 inline-flex items-center gap-6 rounded-3xl px-10 py-4 text-6xl sm:text-7xl font-black tracking-tight border-4 border-current ${tone.chip}`}
+            >
+              <span aria-hidden className="text-7xl sm:text-8xl leading-none">
+                {period ? period.emoji : "🔒"}
+              </span>
+              {period ? period.frame : "Sign-in closed"}
+              <span aria-hidden className="text-7xl sm:text-8xl leading-none">
+                {period ? period.emoji : "🔒"}
+              </span>
+            </p>
+            <p className="mt-5 text-2xl font-medium text-muted-foreground">
+              {period
+                ? `Sign-in ${windowLabel(period)}`
+                : upcoming
+                  ? `Sign-in opens at ${fmt(upcoming.start)}`
+                  : "Sign-in is closed"}
+            </p>
+            {!enabled && (
+              <p className="mt-2 text-lg font-semibold text-muted-foreground">
+                Sign-in is turned off by the teacher
+              </p>
+            )}
+          </section>
 
-        <div className="w-full max-w-4xl grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {STUDENTS.map((s) => {
-            const rec = records[key(s)];
-            const late = rec ? rec.late : isLate;
-            return (
-              <button
-                key={s}
-                disabled={!open || !!rec}
-                onClick={() => signIn(s)}
-                className={`rounded-2xl px-4 py-6 text-2xl font-bold disabled:opacity-50 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-ring ${solid(late)}`}
-              >
-                {s}
-                {rec && (
-                  <span className="block text-base font-medium mt-1">
-                    ✓ Signed in{rec.at ? ` ${rec.at}` : ""}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+          <div className="w-full max-w-4xl grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {STUDENTS.map((s) => {
+              const rec = records[key(s)];
+              const late = rec ? rec.late : isLate;
+              return (
+                <button
+                  key={s}
+                  disabled={!open || !!rec}
+                  onClick={() => signIn(s)}
+                  className={`rounded-2xl px-4 py-6 text-2xl font-bold disabled:opacity-50 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-ring ${solid(late)}`}
+                >
+                  {s}
+                  {rec && (
+                    <span className="block text-base font-medium mt-1">
+                      ✓ Signed in{rec.at ? ` ${rec.at}` : ""}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
