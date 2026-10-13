@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { PERIODS, currentPeriod, evaluateSignIn, nextPeriod } from "@/lib/frames";
+import { PERIODS, clockEmoji, currentPeriod, evaluateSignIn, nextPeriod } from "@/lib/frames";
 
 const t = (h: number, m: number, s = 0) => h * 60 + m + s / 60;
 const [arrival, recess, lunch] = PERIODS;
@@ -39,5 +39,17 @@ describe("evaluateSignIn", () => {
   it("uses the after-lunch cutoff of 1:30", () => {
     expect(evaluateSignIn(lunch!, t(13, 27)).status).toBe("early");
     expect(evaluateSignIn(lunch!, t(13, 40)).late).toBe(true);
+  });
+});
+
+describe("clockEmoji", () => {
+  it("shows the clock face for the nearest half hour", () => {
+    expect(clockEmoji(t(1, 0))).toBe("🕐");
+    expect(clockEmoji(t(10, 7))).toBe("🕙");
+    expect(clockEmoji(t(10, 20))).toBe("🕥");
+    expect(clockEmoji(t(12, 0))).toBe("🕛");
+    expect(clockEmoji(t(0, 10))).toBe("🕛");
+    expect(clockEmoji(t(13, 27))).toBe("🕜");
+    expect(clockEmoji(t(23, 50))).toBe("🕛");
   });
 });

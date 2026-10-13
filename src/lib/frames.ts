@@ -96,6 +96,14 @@ export function evaluateSignIn(period: Period, now: number): Result {
 
 export const windowLabel = (p: Period) => `${fmt(p.start)} → ${fmt(p.end)}`;
 
+// Clock-face emoji for the nearest half hour (emoji only exist at :00 and :30).
+export function clockEmoji(m: number) {
+  const slot = Math.round(m / 30) % 48;
+  const hour12 = Math.floor(slot / 2) % 12;
+  const base = slot % 2 ? 0x1f55c : 0x1f550;
+  return String.fromCodePoint(base + ((hour12 + 11) % 12));
+}
+
 export function fmt(m: number) {
   const h = Math.floor(m / 60),
     mm = String(m % 60).padStart(2, "0");

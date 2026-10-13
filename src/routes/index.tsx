@@ -5,6 +5,7 @@ import {
   PERIODS,
   STUDENTS,
   TONES,
+  clockEmoji,
   clockLabel,
   fmt,
   currentPeriod,
@@ -112,9 +113,14 @@ function Index() {
 
       <div className="flex-1 flex flex-col items-center justify-center gap-10 px-6 py-10">
         <section className="text-center">
-          <p className="text-8xl sm:text-9xl font-black tabular-nums leading-none">
-            {now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
-          </p>
+          <div className="flex items-center justify-center gap-6">
+            <span aria-hidden className="text-8xl sm:text-9xl leading-none">
+              {clockEmoji(n)}
+            </span>
+            <p className="text-8xl sm:text-9xl font-black tabular-nums leading-none">
+              {now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+            </p>
+          </div>
           <p
             className={`mt-8 inline-flex items-center gap-6 rounded-3xl px-10 py-4 text-6xl sm:text-7xl font-black tracking-tight ${tone.chip}`}
           >
