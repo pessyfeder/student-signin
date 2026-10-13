@@ -137,7 +137,7 @@ function Index() {
                   key={s}
                   disabled={!open || !!rec}
                   onClick={() => signIn(s)}
-                  className="rounded-2xl px-4 py-6 text-2xl font-bold disabled:opacity-50 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-ring border-4 border-frame bg-card text-foreground"
+                  className="rounded-2xl px-4 py-6 text-2xl font-bold disabled:opacity-50 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-ring border-4 border-frame bg-early text-early-foreground"
                 >
                   {s}
                   {rec && (
