@@ -1,5 +1,19 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import {
+  PERIODS,
+  STUDENTS,
+  TONES,
+  clockLabel,
+  currentPeriod,
+  fmt,
+  hashPassword,
+  loadRecords,
+  mins,
+  saveRecords,
+  type SignIn,
+  type Status,
+} from "@/lib/frames";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -15,54 +29,18 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const STUDENTS = ["Hindy Fisch", "Mindy Katina", "Esty Oberlander"];
-
-type Tone = "morning" | "recess" | "lunch";
-type Period = {
-  id: string;
-  greet: string;
-  frame: string;
-  tone: Tone;
-  start: number;
-  end: number;
-};
-
-// minutes since midnight
-const PERIODS: Period[] = [
-  { id: "arrival", greet: "Good Morning", frame: "Good Morning", tone: "morning", start: 600, end: 615 },
-  { id: "recess", greet: "Good day", frame: "After Recess", tone: "recess", start: 688, end: 693 },
-  { id: "lunch", greet: "Good Afternoon", frame: "After Lunch", tone: "lunch", start: 805, end: 805 },
-];
-
-const TONES: { [k in Tone]: { wash: string; badge: string; clock: string; bubble: string } } = {
-  morning: { wash: "wash-morning", badge: "grad-morning glow-morning", clock: "text-clock-morning", bubble: "grad-morning" },
-  recess: { wash: "wash-recess", badge: "grad-recess glow-recess", clock: "text-clock-recess", bubble: "grad-recess" },
-  lunch: { wash: "wash-lunch", badge: "grad-lunch glow-lunch", clock: "text-clock-lunch", bubble: "grad-lunch" },
-};
-
-const mins = (d: Date) => d.getHours() * 60 + d.getMinutes() + d.getSeconds() / 60;
-function currentPeriod(now: number) {
-  let p = PERIODS[0]!;
-  for (const x of PERIODS) if (now >= x.start) p = x;
-  return p;
-}
-async function hash(s: string) {
-  const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
-  return Array.from(new Uint8Array(b)).map((x) => x.toString(16).padStart(2, "0")).join("");
-}
-
-type Record = { text: string; late: boolean };
+const isEarly = (n: number, start: number) => n < start;
 
 function Index() {
   const [now, setNow] = useState<Date | null>(null);
   const [enabled, setEnabled] = useState(false);
-  const [records, setRecords] = useState<{ [k: string]: Record }>({});
-  const [msg, setMsg] = useState<Record | null>(null);
+  const [records, setRecords] = useState<{ [k: string]: SignIn }>({});
+  const [msg, setMsg] = useState<SignIn | null>(null);
 
   useEffect(() => {
     setNow(new Date());
     setEnabled(localStorage.getItem("signin-enabled") === "1");
-    setRecords(JSON.parse(localStorage.getItem("signin-records") || "{}"));
+    setRecords(loadRecords());
     const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
@@ -79,7 +57,7 @@ function Index() {
     const stored = localStorage.getItem("signin-pw");
     const pw = window.prompt(stored ? "Teacher password:" : "Create a teacher password:");
     if (!pw) return;
-    const h = await hash(pw);
+    const h = await hashPassword(pw);
     if (!stored) localStorage.setItem("signin-pw", h);
     else if (stored !== h) return alert("Incorrect password");
     const v = !enabled;
@@ -90,21 +68,29 @@ function Index() {
   function signIn(name: string) {
     const first = name.split(" ")[0];
     let detail: string;
-    if (n < period.start) detail = `You signed in ${Math.ceil(period.start - n)} min early`;
-    else if (!isLate) detail = "You signed in on time";
-    else detail = `You signed in ${Math.ceil(n - period.end)} min late`;
-    const rec = { text: `${period.greet}, ${first}! ${detail}.`, late: isLate };
+    let status: Status;
+    if (isEarly(n, period.start)) {
+      detail = `You signed in ${Math.ceil(period.start - n)} min early`;
+      status = "early";
+    } else if (!isLate) {
+      detail = "You signed in on time";
+      status = "ontime";
+    } else {
+      detail = `You signed in ${Math.ceil(n - period.end)} min late`;
+      status = "late";
+    }
+    const rec: SignIn = {
+      text: `${period.greet}, ${first}! ${detail}.`,
+      late: isLate,
+      at: clockLabel(now!),
+      status,
+    };
     const next = { ...records, [key(name)]: rec };
     setRecords(next);
-    localStorage.setItem("signin-records", JSON.stringify(next));
+    saveRecords(next);
     setMsg(rec);
     setTimeout(() => setMsg(null), 6000);
   }
-
-  const fmt = (m: number) => {
-    const h = Math.floor(m / 60), mm = String(m % 60).padStart(2, "0");
-    return `${h > 12 ? h - 12 : h}:${mm}`;
-  };
 
   return (
     <main className="relative min-h-screen overflow-hidden flex flex-col items-center px-6 py-8 gap-7">
@@ -148,15 +134,24 @@ function Index() {
               className={`flex-1 min-w-0 rounded-2xl px-3 py-5 text-xl font-bold transition active:scale-95 disabled:opacity-60 ${late ? "grad-late glow-late text-late-foreground" : "grad-ontime glow-ontime text-ontime-foreground"}`}
             >
               {s}
-              {rec && <span className="block text-sm font-medium mt-1">✓ Signed in</span>}
+              {rec && (
+                <span className="block text-sm font-medium mt-1">
+                  ✓ Signed in{rec.at ? ` ${rec.at}` : ""}
+                </span>
+              )}
             </button>
           );
         })}
       </div>
 
-      <button onClick={toggle} className="mt-auto text-sm underline text-muted-foreground">
-        {enabled ? "Teacher: disable sign-in" : "Teacher: enable sign-in"}
-      </button>
+      <div className="mt-auto flex flex-col items-center gap-2">
+        <Link to="/attendance" className="text-sm underline text-muted-foreground">
+          Teacher: view attendance
+        </Link>
+        <button onClick={toggle} className="text-sm underline text-muted-foreground">
+          {enabled ? "Teacher: disable sign-in" : "Teacher: enable sign-in"}
+        </button>
+      </div>
     </main>
   );
 }
