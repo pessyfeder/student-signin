@@ -142,3 +142,16 @@
     color: var(--color-foreground);
   }
 }
+
+:root {
+  --ontime: oklch(0.62 0.17 150);
+  --ontime-foreground: oklch(0.99 0 0);
+  --late: oklch(0.58 0.21 27);
+  --late-foreground: oklch(0.99 0 0);
+}
+@theme inline {
+  --color-ontime: var(--ontime);
+  --color-ontime-foreground: var(--ontime-foreground);
+  --color-late: var(--late);
+  --color-late-foreground: var(--late-foreground);
+}
