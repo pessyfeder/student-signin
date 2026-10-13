@@ -83,6 +83,9 @@ function Index() {
       late: r.late,
       at: clockLabel(now),
       status: r.status,
+      greet: period.greet,
+      name,
+      detail: r.detail,
     };
     const next = { ...records, [key(name)]: rec };
     setRecords(next);
@@ -154,17 +157,32 @@ function Index() {
 
       <DialogPrimitive.Root open={!!msg} onOpenChange={(o) => !o && setMsg(null)}>
         <DialogPrimitive.Portal>
-          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/60" />
+          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50" />
           <DialogPrimitive.Content
             aria-describedby={undefined}
-            className={`fixed left-1/2 top-1/2 z-50 w-[92vw] max-w-3xl -translate-x-1/2 -translate-y-1/2 rounded-3xl p-10 text-center focus:outline-none ${solid(!!msg?.late)}`}
+            className="fixed left-1/2 top-1/2 z-50 w-[92vw] max-w-2xl -translate-x-1/2 -translate-y-1/2 rounded-3xl bg-background p-8 sm:p-12 text-center focus:outline-none"
           >
-            <DialogPrimitive.Title className="text-4xl sm:text-6xl font-bold leading-tight">
-              {msg?.text}
+            <p aria-hidden className="text-8xl sm:text-9xl leading-none">
+              {msg?.late ? "😞" : "😊"}
+            </p>
+            <DialogPrimitive.Title className="mt-6 text-3xl sm:text-4xl font-semibold text-muted-foreground">
+              {msg?.greet ?? "Hello"},
+              <span className="mt-1 block text-5xl sm:text-7xl font-black text-foreground">
+                {msg?.name ?? msg?.text}!
+              </span>
             </DialogPrimitive.Title>
-            <DialogPrimitive.Close className="mt-10 rounded-2xl bg-background px-10 py-4 text-2xl font-bold text-foreground">
-              OK
-            </DialogPrimitive.Close>
+            {msg?.detail && (
+              <p
+                className={`mt-8 inline-block rounded-full px-8 py-3 text-2xl sm:text-3xl font-bold ${solid(!!msg.late)}`}
+              >
+                {msg.detail}
+              </p>
+            )}
+            <div className="mt-10">
+              <DialogPrimitive.Close className="rounded-2xl bg-primary px-12 py-4 text-2xl font-bold text-primary-foreground">
+                OK
+              </DialogPrimitive.Close>
+            </div>
           </DialogPrimitive.Content>
         </DialogPrimitive.Portal>
       </DialogPrimitive.Root>

@@ -16,6 +16,9 @@ export type SignIn = {
   late: boolean;
   at?: string;
   status?: Status;
+  greet?: string;
+  name?: string;
+  detail?: string;
 };
 
 export const STUDENTS = ["Hindy Fisch", "Mindy Katina", "Esty Oberlander"];
