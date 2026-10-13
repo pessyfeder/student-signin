@@ -51,7 +51,7 @@ function Index() {
   // Close the message window on its own after a few seconds.
   useEffect(() => {
     if (!msg) return;
-    const t = setTimeout(() => setMsg(null), 5000);
+    const t = setTimeout(() => setMsg(null), 3000);
     return () => clearTimeout(t);
   }, [msg]);
 
@@ -89,7 +89,10 @@ function Index() {
       name,
       detail: r.detail,
     };
-    const next = { ...records, [key(name)]: rec };
+    // Read the latest saved records so quick taps by different students don't overwrite each other.
+    const saved = loadRecords();
+    if (saved[key(name)]) return;
+    const next = { ...saved, [key(name)]: rec };
     setRecords(next);
     saveRecords(next);
     setMsg(rec);
