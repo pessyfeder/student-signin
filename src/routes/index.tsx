@@ -116,9 +116,15 @@ function Index() {
             {now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
           </p>
           <p
-            className={`mt-8 inline-block rounded-3xl px-10 py-4 text-6xl sm:text-7xl font-black tracking-tight ${tone.chip}`}
+            className={`mt-8 inline-flex items-center gap-6 rounded-3xl px-10 py-4 text-6xl sm:text-7xl font-black tracking-tight ${tone.chip}`}
           >
+            <span aria-hidden className="text-7xl sm:text-8xl leading-none">
+              {period ? period.emoji : "🔒"}
+            </span>
             {period ? period.frame : "Sign-in closed"}
+            <span aria-hidden className="text-7xl sm:text-8xl leading-none">
+              {period ? period.emoji : "🔒"}
+            </span>
           </p>
           <p className="mt-5 text-2xl font-medium text-muted-foreground">
             {period

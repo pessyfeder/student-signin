@@ -4,6 +4,7 @@ export type Period = {
   id: string;
   greet: string;
   frame: string;
+  emoji: string;
   tone: Tone;
   start: number;
   end: number;
@@ -29,15 +30,25 @@ export const PERIODS: Period[] = [
     id: "arrival",
     greet: "Good Morning",
     frame: "Good Morning",
+    emoji: "☀️",
     tone: "morning",
     start: 600,
     end: 615,
   },
-  { id: "recess", greet: "Good day", frame: "After Recess", tone: "recess", start: 688, end: 693 },
+  {
+    id: "recess",
+    greet: "Good day",
+    frame: "After Recess",
+    emoji: "⚽",
+    tone: "recess",
+    start: 688,
+    end: 693,
+  },
   {
     id: "lunch",
     greet: "Good Afternoon",
     frame: "After Lunch",
+    emoji: "🍎",
     tone: "lunch",
     start: 805,
     end: 810,
