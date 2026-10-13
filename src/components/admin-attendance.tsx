@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useMemo, useState } from "react";
 import {
   beforeEndLabel,
   buildAttendance,
@@ -59,7 +60,7 @@ export function AdminAttendance({
 }) {
   const days = useMemo(() => buildAttendance(records, students), [records, students]);
 
-  // Days are newest first; group them into Sunday to Saturday weeks.
+  // Days arrive newest first; group them into Sunday to Saturday weeks (weeks stay newest first).
   const weeks = useMemo(() => {
     const out: { start: string; days: typeof days }[] = [];
     for (const d of days) {
@@ -68,12 +69,44 @@ export function AdminAttendance({
       if (last && last.start === start) last.days.push(d);
       else out.push({ start, days: [d] });
     }
+    // Within a week, list the days earliest to latest.
+    for (const w of out) w.days.reverse();
     return out;
   }, [days]);
 
+  // Weeks are newest first: index 0 is the latest week; the left arrow goes back to an older week.
+  const [idx, setIdx] = useState(0);
+  const at = Math.min(idx, Math.max(weeks.length - 1, 0));
+  const week = weeks[at];
+  const arrow =
+    "rounded-xl border border-border bg-muted p-2 disabled:opacity-40 focus-visible:outline-4 focus-visible:outline-ring";
+
   return (
     <div className="flex w-full flex-col items-center gap-8">
-      <div className="flex w-full max-w-5xl justify-end">
+      <div className="flex w-full max-w-5xl flex-wrap items-center justify-between gap-3">
+        {week ? (
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIdx(at + 1)}
+              disabled={at >= weeks.length - 1}
+              aria-label="Previous week"
+              className={arrow}
+            >
+              <ChevronLeft aria-hidden className="h-5 w-5" />
+            </button>
+            <p className="text-base font-bold">Week of {weekLabel(week.start)}</p>
+            <button
+              onClick={() => setIdx(at - 1)}
+              disabled={at <= 0}
+              aria-label="Next week"
+              className={arrow}
+            >
+              <ChevronRight aria-hidden className="h-5 w-5" />
+            </button>
+          </div>
+        ) : (
+          <span />
+        )}
         <button
           onClick={() => download("attendance.csv", recordsToCsv(records), "text/csv")}
           className="rounded-xl border border-border bg-muted px-4 py-2 text-sm font-bold"
@@ -84,7 +117,7 @@ export function AdminAttendance({
       {days.length === 0 ? (
         <p className="text-xl font-bold text-muted-foreground">No sign-ins recorded yet.</p>
       ) : (
-        weeks.map((w) => (
+        (week ? [week] : []).map((w) => (
           <div key={w.start} className="flex w-full max-w-5xl flex-col gap-8">
             {w.days.map((d) => (
               <section key={d.day}>
