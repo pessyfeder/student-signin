@@ -29,6 +29,13 @@ export function download(name: string, text: string, type: string) {
   URL.revokeObjectURL(url);
 }
 
+// Early and on time are colored like late is, so status reads at a glance.
+const STATUS_COLOR: { [k in Status]: string } = {
+  early: "text-early",
+  ontime: "text-ontime-border",
+  late: "text-destructive",
+};
+
 const weekLabel = (day: string) => {
   const d = new Date(day);
   return Number.isNaN(d.getTime())
@@ -119,13 +126,7 @@ export function AdminAttendance({
                                 {rec && status ? (
                                   <>
                                     <span className="block tabular-nums">{rec.at}</span>
-                                    <span
-                                      className={
-                                        status === "late"
-                                          ? "block font-bold text-destructive"
-                                          : "block text-muted-foreground"
-                                      }
-                                    >
+                                    <span className={`block font-bold ${STATUS_COLOR[status]}`}>
                                       {STATUS_LABEL[status]}
                                     </span>
                                   </>
