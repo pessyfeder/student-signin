@@ -1,5 +1,4 @@
 import { AnalogClock } from "@/components/analog-clock";
-import { TeacherPasswordDialog } from "@/components/teacher-password-dialog";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -13,7 +12,6 @@ import {
   displayName,
   evaluateSignIn,
   nextPeriod,
-  hashPassword,
   loadRecords,
   loadStudents,
   mins,
@@ -38,16 +36,13 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const [now, setNow] = useState<Date | null>(null);
-  const [enabled, setEnabled] = useState(false);
   const [records, setRecords] = useState<{ [k: string]: SignIn }>({});
   const [msg, setMsg] = useState<SignIn | null>(null);
-  const [pwOpen, setPwOpen] = useState(false);
   const [students, setStudents] = useState<string[]>([]);
 
   useEffect(() => {
     setNow(new Date());
     setStudents(loadStudents());
-    setEnabled(localStorage.getItem("signin-enabled") === "1");
     setRecords(loadRecords());
     const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
@@ -59,22 +54,9 @@ function Index() {
   const upcoming = nextPeriod(n);
   const tone = TONES[(period ?? upcoming ?? PERIODS[0]!).tone];
   const isLate = period ? evaluateSignIn(period, n).late : false;
-  const open = enabled && !!period;
+  const open = !!period;
   const day = now.toDateString();
   const key = (s: string) => `${day}|${period?.id}|${s}`;
-
-  // Teacher password check for the enable/disable switch (masked field, not window.prompt).
-  async function checkPassword(pw: string) {
-    const stored = localStorage.getItem("signin-pw");
-    const h = await hashPassword(pw);
-    if (!stored) localStorage.setItem("signin-pw", h);
-    else if (stored !== h) return "Incorrect password";
-    const v = !enabled;
-    setEnabled(v);
-    localStorage.setItem("signin-enabled", v ? "1" : "0");
-    setPwOpen(false);
-    return null;
-  }
 
   function signIn(name: string) {
     if (!period || !now) return;
@@ -111,12 +93,9 @@ function Index() {
             <Link to="/attendance" className="text-muted-foreground hover:text-foreground">
               View attendance
             </Link>
-            <button
-              onClick={() => setPwOpen(true)}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              {enabled ? "Disable sign-in" : "Enable sign-in"}
-            </button>
+            <Link to="/students" className="text-muted-foreground hover:text-foreground">
+              Add student
+            </Link>
           </nav>
         </header>
 
@@ -149,11 +128,6 @@ function Index() {
                   ? `Sign-in opens at ${fmt(upcoming.start)}`
                   : "Sign-in is closed"}
             </p>
-            {!enabled && (
-              <p className="mt-2 text-lg font-semibold text-muted-foreground">
-                Sign-in is turned off by the teacher
-              </p>
-            )}
           </section>
 
           <div className="w-full max-w-4xl grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -179,13 +153,6 @@ function Index() {
           </div>
         </div>
       </div>
-
-      <TeacherPasswordDialog
-        open={pwOpen}
-        isNew={!localStorage.getItem("signin-pw")}
-        onSubmit={checkPassword}
-        onCancel={() => setPwOpen(false)}
-      />
 
       <DialogPrimitive.Root open={!!msg} onOpenChange={(o) => !o && setMsg(null)}>
         <DialogPrimitive.Portal>

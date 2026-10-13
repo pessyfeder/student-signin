@@ -2,14 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import {
   TONES,
-  addStudent,
   buildAttendance,
   dayLabel,
   hashPassword,
   isUnlocked,
   loadRecords,
   loadStudents,
-  saveStudents,
   recordsToCsv,
   recordStatus,
   windowLabel,
@@ -56,9 +54,6 @@ function Attendance() {
   const [err, setErr] = useState("");
   const [records, setRecords] = useState<{ [k: string]: SignIn }>({});
   const [students, setStudents] = useState<string[]>([]);
-  const [newName, setNewName] = useState("");
-  const [addErr, setAddErr] = useState("");
-  const [added, setAdded] = useState("");
 
   useEffect(() => {
     if (isUnlocked(sessionStorage.getItem("teacher-ok"))) setOk(true);
@@ -91,27 +86,10 @@ function Attendance() {
 
   const days = useMemo(() => buildAttendance(records, students), [records, students]);
 
-  function onAddStudent(e: FormEvent) {
-    e.preventDefault();
-    const r = addStudent(students, newName);
-    if ("error" in r) {
-      setAddErr(r.error);
-      setAdded("");
-      return;
-    }
-    saveStudents(r.list);
-    setStudents(r.list);
-    setAdded(`${r.list[r.list.length - 1]} added`);
-    setNewName("");
-    setAddErr("");
-  }
-
   function lock() {
     sessionStorage.removeItem("teacher-ok");
     setPw("");
     setRecords({});
-    setAdded("");
-    setAddErr("");
     setOk(false);
   }
 
@@ -161,6 +139,9 @@ function Attendance() {
                 </button>
               </>
             )}
+            <Link to="/students" className="text-muted-foreground hover:text-foreground">
+              Add student
+            </Link>
             <Link to="/" className="text-muted-foreground hover:text-foreground">
               Back to sign-in
             </Link>
@@ -198,42 +179,7 @@ function Attendance() {
                 No password yet? The first one you type here becomes the password.
               </p>
             </form>
-          ) : (
-            <form
-              onSubmit={onAddStudent}
-              className="w-full max-w-5xl rounded-2xl border border-border bg-card p-5"
-            >
-              <label htmlFor="new-student" className="block text-lg font-bold">
-                Add a student
-              </label>
-              <div className="mt-3 flex flex-col gap-3 sm:flex-row">
-                <input
-                  id="new-student"
-                  type="text"
-                  autoComplete="off"
-                  value={newName}
-                  onChange={(e) => {
-                    setNewName(e.target.value);
-                    setAddErr("");
-                    setAdded("");
-                  }}
-                  placeholder="First and last name"
-                  className="flex-1 rounded-xl border border-input bg-background px-4 py-3 text-lg outline-none focus:ring-4 focus:ring-ring"
-                />
-                <button
-                  type="submit"
-                  className="rounded-xl bg-primary px-6 py-3 text-lg font-bold text-primary-foreground"
-                >
-                  Add student
-                </button>
-              </div>
-              {addErr && <p className="mt-3 text-base font-bold text-destructive">{addErr}</p>}
-              {added && <p className="mt-3 text-base font-bold">✓ {added}</p>}
-              <p className="mt-3 text-sm text-muted-foreground">
-                {students.length} students: {students.join(", ")}
-              </p>
-            </form>
-          )}
+          ) : null}
           {ok && days.length === 0 ? (
             <p className="text-2xl font-bold text-muted-foreground">No sign-ins recorded yet.</p>
           ) : (
