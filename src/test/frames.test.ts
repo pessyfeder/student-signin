@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  AUTO_LOCK_MS,
   PERIODS,
+  isUnlocked,
+  recordsToCsv,
   displayName,
   handAngles,
   currentPeriod,
@@ -37,6 +40,8 @@ describe("evaluateSignIn", () => {
   it("is on time at the cutoff minute", () => {
     expect(evaluateSignIn(arrival!, t(10, 15)).status).toBe("ontime");
     expect(evaluateSignIn(recess!, t(11, 33, 0.5)).late).toBe(false);
+    expect(evaluateSignIn(arrival!, t(10, 15, 59)).status).toBe("ontime");
+    expect(evaluateSignIn(arrival!, t(10, 16, 0))).toMatchObject({ status: "late", minutes: 1 });
   });
   it("reports minutes late after the cutoff", () => {
     const r = evaluateSignIn(arrival!, t(10, 20));
@@ -77,5 +82,39 @@ describe("displayName", () => {
     const r = ["Rivka Fisch", "Rivka Friedman", "Esty Oberlander"];
     expect(displayName("Rivka Fisch", r)).toBe("Rivka Fisch");
     expect(displayName("Rivka Friedman", r)).toBe("Rivka Friedman");
+  });
+});
+
+describe("isUnlocked", () => {
+  it("locks after the inactivity period", () => {
+    const now = 1_000_000_000;
+    expect(isUnlocked(null, now)).toBe(false);
+    expect(isUnlocked(String(now - 1000), now)).toBe(true);
+    expect(isUnlocked(String(now - AUTO_LOCK_MS - 1), now)).toBe(false);
+    expect(isUnlocked("1", now)).toBe(false);
+  });
+});
+
+describe("recordsToCsv", () => {
+  it("writes one row per sign-in with a header", () => {
+    const csv = recordsToCsv({
+      "Mon Oct 12 2026|arrival|Hindy Fisch": {
+        text: "",
+        late: false,
+        at: "10:07 AM",
+        status: "early",
+      },
+      "Mon Oct 12 2026|recess|Esty Oberlander": {
+        text: "",
+        late: true,
+        at: "11:40 AM",
+        status: "late",
+      },
+    });
+    expect(csv).toBe(
+      "Date,Window,Student,Time,Status\n" +
+        "2026-10-12,Good Morning,Hindy Fisch,10:07 AM,early\n" +
+        "2026-10-12,After Recess,Esty Oberlander,11:40 AM,late\n",
+    );
   });
 });

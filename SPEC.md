@@ -47,7 +47,7 @@ Window definitions live in a single configuration object rather than being scatt
 - **FR-5** When sign-in is disabled, the buttons are visibly inactive and a short message says so.
 
 ### 5.2 Timing and status
-- **FR-6** A sign-in is *on time* if it happens from the window start up to and including the on-time cutoff, and *late* if after the cutoff.
+- **FR-6** A sign-in is *on time* if it happens from the window start up to and including the on-time cutoff, and *late* from the first second after the cutoff minute (10:15:59 is still on time; 10:16:00 is late).
 - **FR-7** Minutes early or late are rounded to whole minutes, and the message says "on time" for the exact minute. "Early" applies only if sign-in is possible before the window start (see Q2).
 - **FR-8** Colour coding applies to both the buttons and the message:
   - **Green:** within the allotted time frame.
@@ -69,7 +69,7 @@ The greeting follows the window (§4). The message stays visible for a few secon
 - **FR-10** A teacher area is protected by a password. Students cannot reach it by tapping the student screen.
 - **FR-11** The teacher can enable or disable sign-in.
 - **FR-12** The teacher can view recorded sign-ins: student, window, time, on-time or late and minutes (from the roadmap item "teacher can view attendance").
-- **FR-13** The teacher can clear or correct a record. This is a safety valve for accidental taps.
+- **FR-13** The attendance page is view-only (no clear or edit). The teacher can download a CSV backup. The page locks after 5 minutes of inactivity, or when the teacher taps Lock.
 
 ### 5.5 Data recorded
 Each sign-in stores: student, window, timestamp, status (`early | on_time | late`), minutes difference.

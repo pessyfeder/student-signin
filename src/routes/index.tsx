@@ -1,4 +1,5 @@
 import { AnalogClock } from "@/components/analog-clock";
+import { TeacherPasswordDialog } from "@/components/teacher-password-dialog";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -39,6 +40,7 @@ function Index() {
   const [enabled, setEnabled] = useState(false);
   const [records, setRecords] = useState<{ [k: string]: SignIn }>({});
   const [msg, setMsg] = useState<SignIn | null>(null);
+  const [pwOpen, setPwOpen] = useState(false);
 
   useEffect(() => {
     setNow(new Date());
@@ -65,16 +67,17 @@ function Index() {
   const day = now.toDateString();
   const key = (s: string) => `${day}|${period?.id}|${s}`;
 
-  async function toggle() {
+  // Teacher password check for the enable/disable switch (masked field, not window.prompt).
+  async function checkPassword(pw: string) {
     const stored = localStorage.getItem("signin-pw");
-    const pw = window.prompt(stored ? "Teacher password:" : "Create a teacher password:");
-    if (!pw) return;
     const h = await hashPassword(pw);
     if (!stored) localStorage.setItem("signin-pw", h);
-    else if (stored !== h) return alert("Incorrect password");
+    else if (stored !== h) return "Incorrect password";
     const v = !enabled;
     setEnabled(v);
     localStorage.setItem("signin-enabled", v ? "1" : "0");
+    setPwOpen(false);
+    return null;
   }
 
   function signIn(name: string) {
@@ -112,7 +115,10 @@ function Index() {
             <Link to="/attendance" className="text-muted-foreground hover:text-foreground">
               View attendance
             </Link>
-            <button onClick={toggle} className="text-muted-foreground hover:text-foreground">
+            <button
+              onClick={() => setPwOpen(true)}
+              className="text-muted-foreground hover:text-foreground"
+            >
               {enabled ? "Disable sign-in" : "Enable sign-in"}
             </button>
           </nav>
@@ -125,6 +131,9 @@ function Index() {
             </div>
             <p className="mt-4 text-8xl sm:text-9xl font-black tabular-nums leading-none">
               {now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+            </p>
+            <p className="mt-3 text-2xl font-semibold text-muted-foreground">
+              {now.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" })}
             </p>
             <p
               className={`mt-8 inline-flex items-center gap-6 rounded-3xl px-10 py-4 text-6xl sm:text-7xl font-black tracking-tight border-4 border-current ${tone.chip}`}
@@ -174,6 +183,13 @@ function Index() {
           </div>
         </div>
       </div>
+
+      <TeacherPasswordDialog
+        open={pwOpen}
+        isNew={!localStorage.getItem("signin-pw")}
+        onSubmit={checkPassword}
+        onCancel={() => setPwOpen(false)}
+      />
 
       <DialogPrimitive.Root open={!!msg} onOpenChange={(o) => !o && setMsg(null)}>
         <DialogPrimitive.Portal>

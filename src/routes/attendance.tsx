@@ -6,7 +6,9 @@ import {
   buildAttendance,
   dayLabel,
   hashPassword,
+  isUnlocked,
   loadRecords,
+  recordsToCsv,
   recordStatus,
   windowLabel,
   type SignIn,
@@ -53,15 +55,49 @@ function Attendance() {
   const [records, setRecords] = useState<{ [k: string]: SignIn }>({});
 
   useEffect(() => {
-    if (sessionStorage.getItem("teacher-ok") === "1") setOk(true);
+    if (isUnlocked(sessionStorage.getItem("teacher-ok"))) setOk(true);
     setChecked(true);
   }, []);
+
+  // Keep the session alive while the teacher is active; lock after a period of inactivity.
+  useEffect(() => {
+    if (!ok) return;
+    const touch = () => sessionStorage.setItem("teacher-ok", String(Date.now()));
+    const check = () => {
+      if (!isUnlocked(sessionStorage.getItem("teacher-ok"))) lock();
+    };
+    window.addEventListener("pointerdown", touch);
+    window.addEventListener("keydown", touch);
+    const t = setInterval(check, 10000);
+    return () => {
+      window.removeEventListener("pointerdown", touch);
+      window.removeEventListener("keydown", touch);
+      clearInterval(t);
+    };
+  }, [ok]);
 
   useEffect(() => {
     if (ok) setRecords(loadRecords());
   }, [ok]);
 
   const days = useMemo(() => buildAttendance(records), [records]);
+
+  function lock() {
+    sessionStorage.removeItem("teacher-ok");
+    setPw("");
+    setRecords({});
+    setOk(false);
+  }
+
+  function downloadCsv() {
+    const blob = new Blob([recordsToCsv(records)], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "attendance.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -75,7 +111,7 @@ function Attendance() {
       setErr("Incorrect password");
       return;
     }
-    sessionStorage.setItem("teacher-ok", "1");
+    sessionStorage.setItem("teacher-ok", String(Date.now()));
     setErr("");
     setOk(true);
   }
@@ -86,6 +122,19 @@ function Attendance() {
         <header className="flex items-center justify-between gap-4 border-b border-border px-6 py-4">
           <h1 className="text-lg font-bold">Attendance</h1>
           <nav className="flex items-center gap-5 text-sm font-semibold">
+            {ok && (
+              <>
+                <button
+                  onClick={downloadCsv}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  Download CSV
+                </button>
+                <button onClick={lock} className="text-muted-foreground hover:text-foreground">
+                  Lock
+                </button>
+              </>
+            )}
             <Link to="/" className="text-muted-foreground hover:text-foreground">
               Back to sign-in
             </Link>
@@ -214,6 +263,12 @@ function Attendance() {
                 </div>
               </section>
             ))
+          )}
+          {ok && (
+            <p className="max-w-5xl text-center text-sm text-muted-foreground">
+              Times come from this device&apos;s clock. Sign-ins are saved in this browser only, so
+              use Download CSV to keep a backup. This page locks after 5 minutes without activity.
+            </p>
           )}
         </div>
       </div>

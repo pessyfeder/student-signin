@@ -98,10 +98,10 @@ export function nextPeriod(now: number): Period | null {
 
 export type Result = { status: Status; minutes: number; late: boolean; detail: string };
 
-// On time = from the window start through the cutoff minute. Within the window,
+// On time = from the window start through the whole cutoff minute (10:15:59 is still 10:15). Within the window,
 // "early" means whole minutes remaining before the cutoff; after it, sign-in is late.
 export function evaluateSignIn(period: Period, now: number): Result {
-  if (now > period.end + 1 / 60) {
+  if (now >= period.end + 1) {
     const minutes = Math.max(1, Math.ceil(now - period.end));
     return { status: "late", minutes, late: true, detail: `You signed in ${minutes} min late` };
   }
@@ -109,6 +109,34 @@ export function evaluateSignIn(period: Period, now: number): Result {
   if (minutes < 1)
     return { status: "ontime", minutes: 0, late: false, detail: "You signed in right on time" };
   return { status: "early", minutes, late: false, detail: `You signed in ${minutes} min early` };
+}
+
+// Teacher access to the attendance page locks itself after a period of inactivity.
+export const AUTO_LOCK_MS = 5 * 60 * 1000;
+
+export function isUnlocked(stamp: string | null, now: number = Date.now()) {
+  const t = Number(stamp);
+  return t > 0 && now - t >= 0 && now - t < AUTO_LOCK_MS;
+}
+
+const csvCell = (v: string) => (/[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v);
+
+// All saved sign-ins as CSV (one row per sign-in), oldest first, for backup.
+export function recordsToCsv(records: { [k: string]: SignIn }) {
+  const rows = Object.entries(records).map(([key, rec]) => {
+    const [day = "", periodId = "", student = ""] = key.split("|");
+    const d = new Date(day);
+    const date = Number.isNaN(d.getTime())
+      ? day
+      : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const period = PERIODS.find((p) => p.id === periodId)?.frame ?? periodId;
+    return { date, period, student, at: rec.at ?? "", status: recordStatus(rec) };
+  });
+  rows.sort((a, b) => a.date.localeCompare(b.date));
+  const lines = rows.map((r) =>
+    [r.date, r.period, r.student, r.at, r.status].map(csvCell).join(","),
+  );
+  return ["Date,Window,Student,Time,Status", ...lines].join("\n") + "\n";
 }
 
 export const windowLabel = (p: Period) => `${fmt(p.start)} → ${fmt(p.end)}`;
