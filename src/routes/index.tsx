@@ -83,73 +83,77 @@ function Index() {
     setTimeout(() => setMsg(null), 6000);
   }
 
-  return (
-    <main className="relative min-h-screen flex flex-col items-center justify-center px-6 py-8 gap-8">
-      <div aria-hidden className={`pointer-events-none fixed inset-0 -z-10 ${tone.wash}`} />
+  const solid = (late: boolean) =>
+    late ? "bg-late text-late-foreground" : "bg-ontime text-ontime-foreground";
 
-      <header className="text-center">
-        <p className={`text-8xl sm:text-9xl font-black tabular-nums leading-none ${tone.clock}`}>
-          {now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
-        </p>
-        <p className="mt-7 text-sm font-extrabold uppercase tracking-[0.4em] text-foreground/70">
-          Right now
-        </p>
-        <div className={`mt-3 inline-block px-10 py-5 rounded-[2.5rem] ${tone.badge}`}>
-          <span className="inline-block text-6xl sm:text-7xl font-black tracking-tight badge-ink">
-            {period ? period.frame : "Sign-in closed"}
-          </span>
-        </div>
-        <p className="mt-5 text-2xl font-semibold text-muted-foreground">
-          {period
-            ? `sign-in · ${windowLabel(period)}`
-            : upcoming
-              ? `Sign-in opens at ${fmt(upcoming.start)}`
-              : "Sign-in is closed"}
-        </p>
-        {!enabled && (
-          <p className="mt-2 text-xl font-bold text-foreground/70">
-            Sign-in is turned off by the teacher
-          </p>
-        )}
+  return (
+    <main className="min-h-screen bg-background text-foreground flex flex-col">
+      <header className="flex items-center justify-between gap-4 border-b border-border px-6 py-4">
+        <h1 className="text-lg font-bold">Class Sign-In</h1>
+        <nav className="flex items-center gap-5 text-sm font-semibold">
+          <Link to="/attendance" className="text-muted-foreground hover:text-foreground">
+            View attendance
+          </Link>
+          <button onClick={toggle} className="text-muted-foreground hover:text-foreground">
+            {enabled ? "Disable sign-in" : "Enable sign-in"}
+          </button>
+        </nav>
       </header>
 
-      {msg && (
-        <div
-          className={`w-full max-w-4xl rounded-3xl p-8 text-center text-5xl font-bold ${msg.late ? "grad-late glow-late text-late-foreground" : "grad-ontime glow-ontime text-ontime-foreground"}`}
-        >
-          {msg.text}
-        </div>
-      )}
+      <div className="flex-1 flex flex-col items-center justify-center gap-10 px-6 py-10">
+        <section className="text-center">
+          <p className="text-8xl sm:text-9xl font-black tabular-nums leading-none">
+            {now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+          </p>
+          <p className={`mt-6 inline-block rounded-full px-6 py-2 text-3xl font-bold ${tone.chip}`}>
+            {period ? period.frame : "Sign-in closed"}
+          </p>
+          <p className="mt-4 text-xl font-medium text-muted-foreground">
+            {period
+              ? `Sign-in ${windowLabel(period)}`
+              : upcoming
+                ? `Sign-in opens at ${fmt(upcoming.start)}`
+                : "Sign-in is closed"}
+          </p>
+          {!enabled && (
+            <p className="mt-2 text-lg font-semibold text-muted-foreground">
+              Sign-in is turned off by the teacher
+            </p>
+          )}
+        </section>
 
-      <div className="w-full max-w-4xl flex flex-row items-stretch gap-4">
-        {STUDENTS.map((s) => {
-          const rec = records[key(s)];
-          const late = rec ? rec.late : isLate;
-          return (
-            <button
-              key={s}
-              disabled={!open || !!rec}
-              onClick={() => signIn(s)}
-              className={`flex-1 min-w-0 rounded-2xl px-3 py-5 text-xl font-bold disabled:opacity-60 ${late ? "grad-late glow-late text-late-foreground" : "grad-ontime glow-ontime text-ontime-foreground"}`}
+        <div className="w-full max-w-4xl min-h-28 flex">
+          {msg && (
+            <div
+              role="status"
+              className={`w-full rounded-2xl px-8 py-6 text-center text-3xl sm:text-4xl font-bold ${solid(msg.late)}`}
             >
-              {s}
-              {rec && (
-                <span className="block text-sm font-medium mt-1">
-                  ✓ Signed in{rec.at ? ` ${rec.at}` : ""}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
+              {msg.text}
+            </div>
+          )}
+        </div>
 
-      <div className="flex flex-col items-center gap-2">
-        <Link to="/attendance" className="text-base font-semibold underline text-foreground/70">
-          Teacher: view attendance
-        </Link>
-        <button onClick={toggle} className="text-base font-semibold underline text-foreground/70">
-          {enabled ? "Teacher: disable sign-in" : "Teacher: enable sign-in"}
-        </button>
+        <div className="w-full max-w-4xl grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {STUDENTS.map((s) => {
+            const rec = records[key(s)];
+            const late = rec ? rec.late : isLate;
+            return (
+              <button
+                key={s}
+                disabled={!open || !!rec}
+                onClick={() => signIn(s)}
+                className={`rounded-2xl px-4 py-6 text-2xl font-bold disabled:opacity-50 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-ring ${solid(late)}`}
+              >
+                {s}
+                {rec && (
+                  <span className="block text-base font-medium mt-1">
+                    ✓ Signed in{rec.at ? ` ${rec.at}` : ""}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </main>
   );

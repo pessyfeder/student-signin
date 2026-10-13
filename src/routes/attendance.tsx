@@ -34,9 +34,9 @@ export const Route = createFileRoute("/attendance")({
 });
 
 const CHIP: { [k in Status]: string } = {
-  early: "grad-early glow-early",
-  ontime: "grad-ontime glow-ontime",
-  late: "grad-late glow-late",
+  early: "bg-early text-early-foreground",
+  ontime: "bg-ontime text-ontime-foreground",
+  late: "bg-late text-late-foreground",
 };
 
 const CHIP_LABEL: { [k in Status]: string } = {
@@ -89,121 +89,115 @@ function Attendance() {
   }
 
   return (
-    <main className="relative min-h-screen flex flex-col items-center px-6 py-10 gap-8">
-      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 wash-rainbow" />
-
-      <header className="text-center">
-        <div className="inline-block px-10 py-4 rounded-[2.5rem] grad-rainbow glow-rainbow">
-          <span className="inline-block text-5xl sm:text-6xl font-black tracking-tight badge-ink">
-            Attendance
-          </span>
-        </div>
-        <p className="mt-4 text-xl font-semibold text-muted-foreground">
-          Arrival times recorded on this device
-        </p>
+    <main className="min-h-screen bg-background text-foreground flex flex-col">
+      <header className="flex items-center justify-between gap-4 border-b border-border px-6 py-4">
+        <h1 className="text-lg font-bold">Attendance</h1>
+        <nav className="flex items-center gap-5 text-sm font-semibold">
+          <Link to="/" className="text-muted-foreground hover:text-foreground">
+            Back to sign-in
+          </Link>
+        </nav>
       </header>
 
-      {!checked ? null : !ok ? (
-        <form
-          onSubmit={submit}
-          className="w-full max-w-md rounded-3xl border border-border bg-card p-7"
-        >
-          <label htmlFor="teacher-pw" className="block text-2xl font-black">
-            Teacher password
-          </label>
-          <input
-            id="teacher-pw"
-            type="password"
-            value={pw}
-            onChange={(e) => {
-              setPw(e.target.value);
-              setErr("");
-            }}
-            className="mt-3 w-full rounded-2xl border border-input bg-background px-4 py-3 text-xl outline-none focus:ring-4 focus:ring-ring"
-            placeholder="Password"
-          />
-          {err && <p className="mt-3 text-lg font-bold text-destructive">{err}</p>}
-          <button
-            type="submit"
-            className="mt-4 w-full rounded-2xl grad-ontime glow-ontime px-4 py-3 text-xl font-bold text-bright"
+      <div className="flex-1 flex flex-col items-center gap-8 px-6 py-10">
+        {!checked ? null : !ok ? (
+          <form
+            onSubmit={submit}
+            className="w-full max-w-md rounded-2xl border border-border bg-card p-6"
           >
-            Show attendance
-          </button>
-          <p className="mt-3 text-sm text-muted-foreground">
-            No password yet? The first one you type here becomes the password.
-          </p>
-        </form>
-      ) : days.length === 0 ? (
-        <p className="text-3xl font-bold text-muted-foreground">No sign-ins recorded yet.</p>
-      ) : (
-        days.map((d) => (
-          <section key={d.day} className="w-full max-w-5xl">
-            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-              <h2 className="text-3xl font-black">{dayLabel(d.day)}</h2>
-              <p className="text-lg font-bold text-muted-foreground">
-                {d.signedIn} of {d.total} sign-ins
-              </p>
-            </div>
+            <label htmlFor="teacher-pw" className="block text-xl font-bold">
+              Teacher password
+            </label>
+            <input
+              id="teacher-pw"
+              type="password"
+              value={pw}
+              onChange={(e) => {
+                setPw(e.target.value);
+                setErr("");
+              }}
+              className="mt-3 w-full rounded-xl border border-input bg-background px-4 py-3 text-lg outline-none focus:ring-4 focus:ring-ring"
+              placeholder="Password"
+            />
+            {err && <p className="mt-3 text-base font-bold text-destructive">{err}</p>}
+            <button
+              type="submit"
+              className="mt-4 w-full rounded-xl bg-primary px-4 py-3 text-lg font-bold text-primary-foreground"
+            >
+              Show attendance
+            </button>
+            <p className="mt-3 text-sm text-muted-foreground">
+              No password yet? The first one you type here becomes the password.
+            </p>
+          </form>
+        ) : days.length === 0 ? (
+          <p className="text-2xl font-bold text-muted-foreground">No sign-ins recorded yet.</p>
+        ) : (
+          days.map((d) => (
+            <section key={d.day} className="w-full max-w-5xl">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                <h2 className="text-2xl font-bold">{dayLabel(d.day)}</h2>
+                <p className="text-base font-semibold text-muted-foreground">
+                  {d.signedIn} of {d.total} sign-ins
+                </p>
+              </div>
 
-            <div className="mt-4 grid items-start gap-5 lg:grid-cols-3">
-              {d.frames.map((f) => {
-                const tone = TONES[f.period.tone];
-                return (
-                  <div key={f.period.id} className="rounded-3xl border border-border bg-card p-5">
-                    <span
-                      className={`inline-block rounded-full px-4 py-1.5 text-xl font-black text-bright ${tone.badge}`}
-                    >
-                      {f.period.frame}
-                    </span>
-                    <p className="mt-3 text-sm font-bold text-muted-foreground">
-                      sign-in · {windowLabel(f.period)}
-                    </p>
-                    <p className="mt-1 text-sm font-bold text-muted-foreground">
-                      {f.counts.ontime} on time · {f.counts.early} early · {f.counts.late} late ·{" "}
-                      {f.counts.missing} missing
-                    </p>
-                    <ul className="mt-4 grid gap-2">
-                      {f.rows.map((r) => (
-                        <li
-                          key={r.student}
-                          className="flex items-center justify-between gap-3 rounded-2xl bg-muted px-4 py-3"
-                        >
-                          <span className="text-lg font-bold">{r.student}</span>
-                          {r.rec ? (
-                            <span className="flex items-center gap-2">
-                              <span
-                                className={`rounded-full px-3 py-1 text-sm font-black text-bright ${CHIP[recordStatus(r.rec)]}`}
-                              >
-                                {r.rec.at ? `${r.rec.at} · ` : ""}
-                                {CHIP_LABEL[recordStatus(r.rec)]}
+              <div className="mt-4 grid items-start gap-4 lg:grid-cols-3">
+                {d.frames.map((f) => {
+                  const tone = TONES[f.period.tone];
+                  return (
+                    <div key={f.period.id} className="rounded-2xl border border-border bg-card p-5">
+                      <span
+                        className={`inline-block rounded-full px-4 py-1 text-lg font-bold ${tone.chip}`}
+                      >
+                        {f.period.frame}
+                      </span>
+                      <p className="mt-3 text-sm font-semibold text-muted-foreground">
+                        Sign-in {windowLabel(f.period)}
+                      </p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {f.counts.ontime} on time · {f.counts.early} early · {f.counts.late} late ·{" "}
+                        {f.counts.missing} missing
+                      </p>
+                      <ul className="mt-4 grid gap-2">
+                        {f.rows.map((r) => (
+                          <li
+                            key={r.student}
+                            className="flex items-center justify-between gap-3 rounded-xl bg-muted px-4 py-3"
+                          >
+                            <span className="text-base font-semibold">{r.student}</span>
+                            {r.rec ? (
+                              <span className="flex items-center gap-2">
+                                <span
+                                  className={`rounded-full px-3 py-1 text-sm font-bold ${CHIP[recordStatus(r.rec)]}`}
+                                >
+                                  {r.rec.at ? `${r.rec.at} · ` : ""}
+                                  {CHIP_LABEL[recordStatus(r.rec)]}
+                                </span>
+                                <button
+                                  onClick={() => clearRecord(d.day, f.period.id, r.student)}
+                                  aria-label={`Clear ${r.student}'s sign-in`}
+                                  className="text-sm font-semibold text-muted-foreground underline"
+                                >
+                                  Clear
+                                </button>
                               </span>
-                              <button
-                                onClick={() => clearRecord(d.day, f.period.id, r.student)}
-                                aria-label={`Clear ${r.student}'s sign-in`}
-                                className="rounded-full bg-background px-2 py-1 text-sm font-bold text-muted-foreground underline"
-                              >
-                                Clear
-                              </button>
-                            </span>
-                          ) : (
-                            <span className="rounded-full bg-background px-3 py-1 text-sm font-bold text-muted-foreground">
-                              Not signed in
-                            </span>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-        ))
-      )}
-
-      <Link to="/" className="text-base font-semibold underline text-foreground/70">
-        Back to sign-in
-      </Link>
+                            ) : (
+                              <span className="text-sm font-semibold text-muted-foreground">
+                                Not signed in
+                              </span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          ))
+        )}
+      </div>
     </main>
   );
 }

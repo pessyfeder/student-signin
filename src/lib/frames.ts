@@ -41,27 +41,10 @@ export const PERIODS: Period[] = [
   },
 ];
 
-export const TONES: {
-  [k in Tone]: { wash: string; badge: string; clock: string; bubble: string };
-} = {
-  morning: {
-    wash: "wash-morning",
-    badge: "grad-morning glow-morning",
-    clock: "text-clock-morning",
-    bubble: "grad-morning",
-  },
-  recess: {
-    wash: "wash-recess",
-    badge: "grad-recess glow-recess",
-    clock: "text-clock-recess",
-    bubble: "grad-recess",
-  },
-  lunch: {
-    wash: "wash-lunch",
-    badge: "grad-lunch glow-lunch",
-    clock: "text-clock-lunch",
-    bubble: "grad-lunch",
-  },
+export const TONES: { [k in Tone]: { chip: string } } = {
+  morning: { chip: "bg-morning text-morning-ink" },
+  recess: { chip: "bg-recess text-recess-ink" },
+  lunch: { chip: "bg-lunch text-lunch-ink" },
 };
 
 export const mins = (d: Date) => d.getHours() * 60 + d.getMinutes() + d.getSeconds() / 60;
