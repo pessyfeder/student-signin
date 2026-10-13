@@ -47,6 +47,8 @@ function Admin() {
   useEffect(() => {
     if (isUnlocked(sessionStorage.getItem("teacher-ok"))) setOk(true);
     setChecked(true);
+    // Leaving Admin (to the sign-in page, or reloading) locks it again.
+    return () => sessionStorage.removeItem("teacher-ok");
   }, []);
 
   // Keep the session alive while the teacher is active; lock after a period of inactivity.
