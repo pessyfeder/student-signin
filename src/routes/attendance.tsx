@@ -1,13 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import {
+  STUDENTS,
   TONES,
   buildAttendance,
   dayLabel,
   hashPassword,
   loadRecords,
   recordStatus,
-  saveRecords,
   windowLabel,
   type SignIn,
   type Status,
@@ -62,14 +62,6 @@ function Attendance() {
   }, [ok]);
 
   const days = useMemo(() => buildAttendance(records), [records]);
-
-  function clearRecord(day: string, periodId: string, student: string) {
-    if (!window.confirm(`Clear ${student}'s sign-in?`)) return;
-    const next = { ...records };
-    delete next[`${day}|${periodId}|${student}`];
-    setRecords(next);
-    saveRecords(next);
-  }
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -142,57 +134,79 @@ function Attendance() {
                 </p>
               </div>
 
-              <div className="mt-4 grid items-start gap-4 lg:grid-cols-3">
-                {d.frames.map((f) => {
-                  const tone = TONES[f.period.tone];
-                  return (
-                    <div key={f.period.id} className="rounded-2xl border border-border bg-card p-5">
-                      <span
-                        className={`inline-block rounded-full px-4 py-1 text-lg font-bold ${tone.chip}`}
+              <div className="mt-4 overflow-x-auto rounded-2xl border border-border">
+                <table className="w-full border-collapse text-left">
+                  <thead>
+                    <tr className="bg-muted">
+                      <th
+                        scope="col"
+                        className="px-5 py-4 text-sm font-bold uppercase text-muted-foreground"
                       >
-                        {f.period.frame}
-                      </span>
-                      <p className="mt-3 text-sm font-semibold text-muted-foreground">
-                        Sign-in {windowLabel(f.period)}
-                      </p>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {f.counts.ontime} on time · {f.counts.early} early · {f.counts.late} late ·{" "}
-                        {f.counts.missing} missing
-                      </p>
-                      <ul className="mt-4 grid gap-2">
-                        {f.rows.map((r) => (
-                          <li
-                            key={r.student}
-                            className="flex items-center justify-between gap-3 rounded-xl bg-muted px-4 py-3"
+                        Student
+                      </th>
+                      {d.frames.map((f) => (
+                        <th key={f.period.id} scope="col" className="px-5 py-4">
+                          <span
+                            className={`inline-block rounded-full px-3 py-1 text-base font-bold ${TONES[f.period.tone].chip}`}
                           >
-                            <span className="text-base font-semibold">{r.student}</span>
-                            {r.rec ? (
-                              <span className="flex items-center gap-2">
-                                <span
-                                  className={`rounded-full px-3 py-1 text-sm font-bold ${CHIP[recordStatus(r.rec)]}`}
-                                >
-                                  {r.rec.at ? `${r.rec.at} · ` : ""}
-                                  {CHIP_LABEL[recordStatus(r.rec)]}
+                            {f.period.emoji} {f.period.frame}
+                          </span>
+                          <span className="mt-1 block text-sm font-medium text-muted-foreground">
+                            {windowLabel(f.period)}
+                          </span>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {STUDENTS.map((student, i) => (
+                      <tr key={student} className="border-t border-border">
+                        <th scope="row" className="px-5 py-4 text-lg font-bold">
+                          {student}
+                        </th>
+                        {d.frames.map((f) => {
+                          const rec = f.rows[i]?.rec;
+                          return (
+                            <td key={f.period.id} className="px-5 py-4">
+                              {rec ? (
+                                <span className="flex flex-col items-start gap-1">
+                                  <span
+                                    className={`rounded-full px-3 py-1 text-sm font-bold ${CHIP[recordStatus(rec)]}`}
+                                  >
+                                    {CHIP_LABEL[recordStatus(rec)]}
+                                  </span>
+                                  <span className="text-base font-semibold tabular-nums">
+                                    {rec.at}
+                                  </span>
                                 </span>
-                                <button
-                                  onClick={() => clearRecord(d.day, f.period.id, r.student)}
-                                  aria-label={`Clear ${r.student}'s sign-in`}
-                                  className="text-sm font-semibold text-muted-foreground underline"
-                                >
-                                  Clear
-                                </button>
-                              </span>
-                            ) : (
-                              <span className="text-sm font-semibold text-muted-foreground">
-                                Not signed in
-                              </span>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  );
-                })}
+                              ) : (
+                                <span className="text-base font-semibold text-muted-foreground">
+                                  Not signed in
+                                </span>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="border-t border-border bg-muted">
+                      <th scope="row" className="px-5 py-3 text-sm font-bold text-muted-foreground">
+                        Totals
+                      </th>
+                      {d.frames.map((f) => (
+                        <td
+                          key={f.period.id}
+                          className="px-5 py-3 text-sm font-semibold text-muted-foreground"
+                        >
+                          {f.counts.early + f.counts.ontime} on time · {f.counts.late} late ·{" "}
+                          {f.counts.missing} missing
+                        </td>
+                      ))}
+                    </tr>
+                  </tfoot>
+                </table>
               </div>
             </section>
           ))
