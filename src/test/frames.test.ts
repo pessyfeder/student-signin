@@ -1,12 +1,18 @@
 import { describe, expect, it } from "vitest";
 
-import { PERIODS, currentPeriod, evaluateSignIn } from "@/lib/frames";
+import { PERIODS, currentPeriod, evaluateSignIn, nextPeriod } from "@/lib/frames";
 
 const t = (h: number, m: number, s = 0) => h * 60 + m + s / 60;
 const [arrival, recess, lunch] = PERIODS;
 
 describe("currentPeriod", () => {
   it("is closed before 10:00", () => expect(currentPeriod(t(9, 59))).toBeNull());
+  it("closes at 3:00 PM and stays closed", () => {
+    expect(currentPeriod(t(14, 59))?.id).toBe("lunch");
+    expect(currentPeriod(t(15, 0))).toBeNull();
+    expect(currentPeriod(t(21, 12))).toBeNull();
+    expect(nextPeriod(t(15, 0))).toBeNull();
+  });
   it("switches to the next window at its start time", () => {
     expect(currentPeriod(t(10, 0))?.id).toBe("arrival");
     expect(currentPeriod(t(11, 27))?.id).toBe("arrival");

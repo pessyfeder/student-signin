@@ -86,7 +86,7 @@ Each sign-in stores: student, window, timestamp, status (`early | on_time | late
 
 | # | Question (from `Spec.txt` unless noted) | Proposed default |
 |---|---|---|
-| Q1 | Allow sign-in after a window closes, and for how long? | Allow it, shown red, until the next window starts. A student who arrives late should still be able to record it. |
+| Q1 | Allow sign-in after a window closes, and for how long? | Allow it, shown red, until the next window starts. After lunch, sign-in closes at **3:00 PM** (end of school day). A student who arrives late should still be able to record it. |
 | Q2 | Can students sign in before a window starts? | No. Buttons are inactive before the start. "Early" then means early within the window (before the on-time cutoff). Needs your confirmation, since the spec says "early". |
 | Q3 | Do timings update automatically or are they teacher-enabled? | Windows turn on and off automatically by the clock. The teacher's enable switch is a master override on top of that. |
 | Q4 | Where do the teacher password and the records live? (new) | v1: browser local storage with a hashed password. Needs a backend if records must be shared across devices. |

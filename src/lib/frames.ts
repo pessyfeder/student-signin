@@ -49,9 +49,13 @@ export const TONES: { [k in Tone]: { chip: string } } = {
 
 export const mins = (d: Date) => d.getHours() * 60 + d.getMinutes() + d.getSeconds() / 60;
 
+// End of the school day: sign-in closes for good (minutes since midnight, 3:00 PM).
+export const DAY_END = 900;
+
 // The window currently open for sign-in: the latest one that has started.
-// Before the first window starts there is none, so sign-in is closed.
+// Before the first window starts, or from the end of the school day, there is none.
 export function currentPeriod(now: number): Period | null {
+  if (now >= DAY_END) return null;
   let p: Period | null = null;
   for (const x of PERIODS) if (now >= x.start) p = x;
   return p;
