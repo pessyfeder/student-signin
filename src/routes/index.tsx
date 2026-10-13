@@ -115,10 +115,12 @@ function Index() {
           <p className="text-8xl sm:text-9xl font-black tabular-nums leading-none">
             {now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
           </p>
-          <p className={`mt-6 inline-block rounded-full px-6 py-2 text-3xl font-bold ${tone.chip}`}>
+          <p
+            className={`mt-8 inline-block rounded-3xl px-10 py-4 text-6xl sm:text-7xl font-black tracking-tight ${tone.chip}`}
+          >
             {period ? period.frame : "Sign-in closed"}
           </p>
-          <p className="mt-4 text-xl font-medium text-muted-foreground">
+          <p className="mt-5 text-2xl font-medium text-muted-foreground">
             {period
               ? `Sign-in ${windowLabel(period)}`
               : upcoming
