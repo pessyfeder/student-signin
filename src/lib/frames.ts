@@ -24,6 +24,23 @@ export type SignIn = {
 
 export const STUDENTS = ["Hindy Fisch", "Mindy Katina", "Esty Oberlander"];
 
+// First name only; add the surname initial if another student shares the first name,
+// and the full name if the initial matches too.
+export function displayName(name: string, all: string[] = STUDENTS) {
+  const parts = (n: string) => {
+    const [first = "", ...rest] = n.trim().split(/\s+/);
+    return { first, initial: (rest[0] ?? "").charAt(0) };
+  };
+  const me = parts(name);
+  const sameFirst = all
+    .filter((n) => n !== name)
+    .map(parts)
+    .filter((o) => o.first.toLowerCase() === me.first.toLowerCase());
+  if (sameFirst.length === 0) return me.first;
+  if (sameFirst.some((o) => o.initial.toLowerCase() === me.initial.toLowerCase())) return name;
+  return me.first + " " + me.initial + ".";
+}
+
 // minutes since midnight
 export const PERIODS: Period[] = [
   {

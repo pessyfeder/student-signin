@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { PERIODS, handAngles, currentPeriod, evaluateSignIn, nextPeriod } from "@/lib/frames";
+import {
+  PERIODS,
+  displayName,
+  handAngles,
+  currentPeriod,
+  evaluateSignIn,
+  nextPeriod,
+} from "@/lib/frames";
 
 const t = (h: number, m: number, s = 0) => h * 60 + m + s / 60;
 const [arrival, recess, lunch] = PERIODS;
@@ -52,5 +59,23 @@ describe("handAngles", () => {
   it("moves the second hand with the seconds", () => {
     expect(handAngles(t(10, 20, 15)).second).toBe(90);
     expect(handAngles(t(10, 20, 45)).second).toBe(270);
+  });
+});
+
+describe("displayName", () => {
+  const roster = ["Hindy Fisch", "Mindy Katina", "Esty Oberlander"];
+  it("uses the first name when it is unique", () => {
+    expect(displayName("Hindy Fisch", roster)).toBe("Hindy");
+  });
+  it("adds the surname initial when a first name is shared", () => {
+    const r = ["Rivka Fisch", "Rivka Katina", "Esty Oberlander"];
+    expect(displayName("Rivka Fisch", r)).toBe("Rivka F.");
+    expect(displayName("Rivka Katina", r)).toBe("Rivka K.");
+    expect(displayName("Esty Oberlander", r)).toBe("Esty");
+  });
+  it("uses the full name when first name and initial are both shared", () => {
+    const r = ["Rivka Fisch", "Rivka Friedman", "Esty Oberlander"];
+    expect(displayName("Rivka Fisch", r)).toBe("Rivka Fisch");
+    expect(displayName("Rivka Friedman", r)).toBe("Rivka Friedman");
   });
 });

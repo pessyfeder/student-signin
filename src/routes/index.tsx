@@ -9,6 +9,7 @@ import {
   clockLabel,
   fmt,
   currentPeriod,
+  displayName,
   evaluateSignIn,
   nextPeriod,
   hashPassword,
@@ -50,7 +51,7 @@ function Index() {
   // Close the message window on its own after a few seconds.
   useEffect(() => {
     if (!msg) return;
-    const t = setTimeout(() => setMsg(null), 8000);
+    const t = setTimeout(() => setMsg(null), 5000);
     return () => clearTimeout(t);
   }, [msg]);
 
@@ -80,7 +81,7 @@ function Index() {
     if (!period || !now) return;
     const r = evaluateSignIn(period, n);
     const rec: SignIn = {
-      text: `${period.greet}, ${name}! ${r.detail}.`,
+      text: `${period.greet}, ${displayName(name)}! ${r.detail}.`,
       late: r.late,
       at: clockLabel(now),
       status: r.status,
@@ -184,7 +185,7 @@ function Index() {
             <DialogPrimitive.Title className="mt-6 text-3xl sm:text-4xl font-semibold text-muted-foreground">
               {msg?.greet ?? "Hello"},
               <span className="mt-1 block text-5xl sm:text-7xl font-black text-foreground">
-                {msg?.name ?? msg?.text}!
+                {msg?.name ? displayName(msg.name) : msg?.text}!
               </span>
             </DialogPrimitive.Title>
             {msg?.detail && (
@@ -194,11 +195,6 @@ function Index() {
                 {msg.detail}
               </p>
             )}
-            <div className="mt-10">
-              <DialogPrimitive.Close className="rounded-2xl bg-primary px-12 py-4 text-2xl font-bold text-primary-foreground">
-                OK
-              </DialogPrimitive.Close>
-            </div>
           </DialogPrimitive.Content>
         </DialogPrimitive.Portal>
       </DialogPrimitive.Root>
