@@ -1,4 +1,4 @@
-export type Tone = "morning" | "recess" | "lunch";
+export type Tone = "morning" | "recess" | "recess2" | "lunch";
 
 export type Period = {
   id: string;
@@ -132,8 +132,8 @@ export const PERIODS: Period[] = [
     id: "recess2",
     greet: "Good day",
     frame: "After English Recess",
-    emoji: "⚽",
-    tone: "recess",
+    emoji: "🏀",
+    tone: "recess2",
     start: 925,
     end: 930,
   },
@@ -142,6 +142,7 @@ export const PERIODS: Period[] = [
 export const TONES: { [k in Tone]: { chip: string } } = {
   morning: { chip: "bg-morning text-morning-ink" },
   recess: { chip: "bg-recess text-recess-ink" },
+  recess2: { chip: "bg-recess2 text-recess2-ink" },
   lunch: { chip: "bg-lunch text-lunch-ink" },
 };
 

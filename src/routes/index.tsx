@@ -132,13 +132,12 @@ function Index() {
           <div className="w-full max-w-4xl grid grid-cols-1 sm:grid-cols-3 gap-4">
             {students.map((s) => {
               const rec = records[key(s)];
-              const late = rec ? rec.late : isLate;
               return (
                 <button
                   key={s}
                   disabled={!open || !!rec}
                   onClick={() => signIn(s)}
-                  className={`rounded-2xl px-4 py-6 text-2xl font-bold disabled:opacity-50 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-ring ${solid(late)}`}
+                  className="rounded-2xl px-4 py-6 text-2xl font-bold disabled:opacity-50 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-ring border-4 border-frame bg-card text-foreground"
                 >
                   {s}
                   {rec && (

@@ -167,6 +167,8 @@
   --recess-ink: oklch(0.42 0.09 210);
   --lunch: oklch(0.95 0.05 310);
   --lunch-ink: oklch(0.42 0.14 305);
+  --recess2: oklch(0.95 0.06 145);
+  --recess2-ink: oklch(0.4 0.1 150);
 }
 
 @theme inline {
@@ -178,6 +180,8 @@
   --color-recess-ink: var(--recess-ink);
   --color-lunch: var(--lunch);
   --color-lunch-ink: var(--lunch-ink);
+  --color-recess2: var(--recess2);
+  --color-recess2-ink: var(--recess2-ink);
 }
 
 /* ---- borders ---- */
