@@ -4,10 +4,10 @@ import {
   TONES,
   buildAttendance,
   dayLabel,
-  fmt,
   hashPassword,
   loadRecords,
   recordStatus,
+  windowLabel,
   type SignIn,
   type Status,
 } from "@/lib/frames";
@@ -127,7 +127,7 @@ function Attendance() {
               </p>
             </div>
 
-            <div className="mt-4 grid gap-5 lg:grid-cols-3">
+            <div className="mt-4 grid items-start gap-5 lg:grid-cols-3">
               {d.frames.map((f) => {
                 const tone = TONES[f.period.tone];
                 return (
@@ -135,18 +135,20 @@ function Attendance() {
                     <span className={`inline-block rounded-full px-4 py-1.5 text-xl font-black text-bright ${tone.badge}`}>
                       {f.period.frame}
                     </span>
-                    <p className="mt-2 text-sm font-bold text-muted-foreground">
-                      sign-in · {fmt(f.period.start)}
-                      {f.period.end !== f.period.start && `–${fmt(f.period.end)}`} · {f.counts.ontime} on time,{" "}
-                      {f.counts.late} late, {f.counts.missing} missing
+                    <p className="mt-3 text-sm font-bold text-muted-foreground">
+                      sign-in · {windowLabel(f.period)}
                     </p>
-                    <ul className="mt-3 grid gap-2">
+                    <p className="mt-1 text-sm font-bold text-muted-foreground">
+                      {f.counts.ontime} on time · {f.counts.early} early · {f.counts.late} late ·{" "}
+                      {f.counts.missing} missing
+                    </p>
+                    <ul className="mt-4 grid gap-2">
                       {f.rows.map((r) => (
                         <li
                           key={r.student}
                           className="flex items-center justify-between gap-3 rounded-2xl bg-muted px-4 py-3"
                         >
-                          <span className="text-lg font-bold">{r.student.split(" ")[0]}</span>
+                          <span className="text-lg font-bold">{r.student}</span>
                           {r.rec ? (
                             <span
                               className={`rounded-full px-3 py-1 text-sm font-black text-bright ${CHIP[recordStatus(r.rec)]}`}
@@ -170,7 +172,7 @@ function Attendance() {
         ))
       )}
 
-      <Link to="/" className="mt-auto text-sm underline text-muted-foreground">
+      <Link to="/" className="text-base font-semibold underline text-foreground/70">
         Back to sign-in
       </Link>
     </main>

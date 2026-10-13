@@ -1,16 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
-  PERIODS,
   STUDENTS,
   TONES,
   clockLabel,
   currentPeriod,
-  fmt,
   hashPassword,
   loadRecords,
   mins,
   saveRecords,
+  windowLabel,
   type SignIn,
   type Status,
 } from "@/lib/frames";
@@ -91,7 +90,7 @@ function Index() {
   }
 
   return (
-    <main className="relative min-h-screen flex flex-col items-center px-6 py-8 gap-7">
+    <main className="relative min-h-screen flex flex-col items-center justify-center px-6 py-8 gap-8">
       <div aria-hidden className={`pointer-events-none fixed inset-0 -z-10 ${tone.wash}`} />
 
       <header className="text-center">
@@ -104,10 +103,7 @@ function Index() {
             {period.frame}
           </span>
         </div>
-        <p className="mt-5 text-2xl font-semibold text-muted-foreground">
-          sign-in · {fmt(period.start)}
-          {period.end !== period.start && `–${fmt(period.end)}`}
-        </p>
+        <p className="mt-5 text-2xl font-semibold text-muted-foreground">sign-in · {windowLabel(period)}</p>
       </header>
 
       {msg && (
@@ -138,11 +134,11 @@ function Index() {
         })}
       </div>
 
-      <div className="mt-auto flex flex-col items-center gap-2">
-        <Link to="/attendance" className="text-sm underline text-muted-foreground">
+      <div className="flex flex-col items-center gap-2">
+        <Link to="/attendance" className="text-base font-semibold underline text-foreground/70">
           Teacher: view attendance
         </Link>
-        <button onClick={toggle} className="text-sm underline text-muted-foreground">
+        <button onClick={toggle} className="text-base font-semibold underline text-foreground/70">
           {enabled ? "Teacher: disable sign-in" : "Teacher: enable sign-in"}
         </button>
       </div>
