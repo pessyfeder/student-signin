@@ -25,7 +25,7 @@ const PERIODS = [
 
 const mins = (d: Date) => d.getHours() * 60 + d.getMinutes() + d.getSeconds() / 60;
 function currentPeriod(now: number) {
-  let p = PERIODS[0];
+  let p = PERIODS[0]!;
   for (const x of PERIODS) if (now >= x.start) p = x;
   return p;
 }
