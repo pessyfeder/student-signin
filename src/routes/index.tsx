@@ -1,6 +1,7 @@
 import { AnalogClock } from "@/components/analog-clock";
 import { TeacherPasswordDialog } from "@/components/teacher-password-dialog";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { X } from "lucide-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
@@ -49,13 +50,6 @@ function Index() {
     const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
-
-  // Close the message window on its own after a few seconds.
-  useEffect(() => {
-    if (!msg) return;
-    const t = setTimeout(() => setMsg(null), 3000);
-    return () => clearTimeout(t);
-  }, [msg]);
 
   if (!now) return null;
   const n = mins(now);
@@ -198,6 +192,12 @@ function Index() {
             aria-describedby={undefined}
             className="fixed left-1/2 top-1/2 z-50 w-[92vw] max-w-2xl -translate-x-1/2 -translate-y-1/2 rounded-3xl bg-background p-8 sm:p-12 text-center focus:outline-none"
           >
+            <DialogPrimitive.Close
+              aria-label="Close message"
+              className="absolute right-4 top-4 flex h-14 w-14 items-center justify-center rounded-full border-4 border-frame bg-background text-foreground"
+            >
+              <X aria-hidden className="h-8 w-8" strokeWidth={3} />
+            </DialogPrimitive.Close>
             <p aria-hidden className="text-8xl sm:text-9xl leading-none">
               {msg?.late ? "😞" : "😊"}
             </p>
