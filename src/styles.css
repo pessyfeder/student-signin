@@ -155,3 +155,124 @@
   --color-late: var(--late);
   --color-late-foreground: var(--late-foreground);
 }
+
+/* ---- time-of-day frames: colourful classroom display ---- */
+:root {
+  --bright: oklch(0.99 0 0);
+
+  --morning-1: oklch(0.88 0.14 85);
+  --morning-2: oklch(0.78 0.17 60);
+  --morning-3: oklch(0.65 0.19 25);
+  --recess-1: oklch(0.9 0.11 170);
+  --recess-2: oklch(0.77 0.14 195);
+  --recess-3: oklch(0.62 0.16 235);
+  --lunch-1: oklch(0.88 0.12 350);
+  --lunch-2: oklch(0.75 0.18 355);
+  --lunch-3: oklch(0.61 0.19 305);
+
+  --ontime-deep: oklch(0.5 0.15 155);
+  --late-deep: oklch(0.47 0.18 25);
+
+  --badge-morning-a: oklch(0.73 0.17 58);
+  --badge-morning-b: oklch(0.57 0.19 22);
+  --badge-recess-a: oklch(0.72 0.14 190);
+  --badge-recess-b: oklch(0.55 0.16 235);
+  --badge-lunch-a: oklch(0.72 0.17 350);
+  --badge-lunch-b: oklch(0.55 0.19 305);
+  --gradient-morning: linear-gradient(115deg, var(--badge-morning-a), var(--badge-morning-b));
+  --gradient-recess: linear-gradient(115deg, var(--badge-recess-a), var(--badge-recess-b));
+  --gradient-lunch: linear-gradient(115deg, var(--badge-lunch-a), var(--badge-lunch-b));
+
+  --gradient-clock-morning: linear-gradient(120deg, var(--morning-2), var(--morning-3));
+  --gradient-clock-recess: linear-gradient(120deg, var(--recess-2), var(--recess-3));
+  --gradient-clock-lunch: linear-gradient(120deg, var(--lunch-2), var(--lunch-3));
+  --gradient-ontime: linear-gradient(140deg, var(--ontime), var(--ontime-deep));
+  --gradient-late: linear-gradient(140deg, var(--late), var(--late-deep));
+
+  --wash-morning:
+    radial-gradient(55% 45% at 12% 4%, color-mix(in oklab, var(--morning-1) 70%, transparent), transparent 70%),
+    radial-gradient(45% 40% at 88% 8%, color-mix(in oklab, var(--morning-2) 55%, transparent), transparent 72%),
+    radial-gradient(65% 55% at 50% 100%, color-mix(in oklab, var(--morning-3) 35%, transparent), transparent 75%);
+  --wash-recess:
+    radial-gradient(55% 45% at 12% 4%, color-mix(in oklab, var(--recess-1) 70%, transparent), transparent 70%),
+    radial-gradient(45% 40% at 88% 8%, color-mix(in oklab, var(--recess-2) 55%, transparent), transparent 72%),
+    radial-gradient(65% 55% at 50% 100%, color-mix(in oklab, var(--recess-3) 35%, transparent), transparent 75%);
+  --wash-lunch:
+    radial-gradient(55% 45% at 12% 4%, color-mix(in oklab, var(--lunch-1) 70%, transparent), transparent 70%),
+    radial-gradient(45% 40% at 88% 8%, color-mix(in oklab, var(--lunch-2) 55%, transparent), transparent 72%),
+    radial-gradient(65% 55% at 50% 100%, color-mix(in oklab, var(--lunch-3) 35%, transparent), transparent 75%);
+}
+
+@theme inline {
+  --color-bright: var(--bright);
+  --color-morning-1: var(--morning-1);
+  --color-morning-2: var(--morning-2);
+  --color-morning-3: var(--morning-3);
+  --color-recess-1: var(--recess-1);
+  --color-recess-2: var(--recess-2);
+  --color-recess-3: var(--recess-3);
+  --color-lunch-1: var(--lunch-1);
+  --color-lunch-2: var(--lunch-2);
+  --color-lunch-3: var(--lunch-3);
+}
+
+@utility grad-morning { background-image: var(--gradient-morning); }
+@utility grad-recess { background-image: var(--gradient-recess); }
+@utility grad-lunch { background-image: var(--gradient-lunch); }
+@utility grad-ontime { background-image: var(--gradient-ontime); }
+@utility grad-late { background-image: var(--gradient-late); }
+
+@utility wash-morning { background-image: var(--wash-morning); }
+@utility wash-recess { background-image: var(--wash-recess); }
+@utility wash-lunch { background-image: var(--wash-lunch); }
+
+@utility text-clock-morning {
+  background-image: var(--gradient-clock-morning);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+@utility text-clock-recess {
+  background-image: var(--gradient-clock-recess);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+@utility text-clock-lunch {
+  background-image: var(--gradient-clock-lunch);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility glow-morning { box-shadow: 0 22px 55px -18px color-mix(in oklab, var(--morning-3) 60%, transparent); }
+@utility glow-recess { box-shadow: 0 22px 55px -18px color-mix(in oklab, var(--recess-3) 60%, transparent); }
+@utility glow-lunch { box-shadow: 0 22px 55px -18px color-mix(in oklab, var(--lunch-3) 60%, transparent); }
+@utility glow-ontime { box-shadow: 0 16px 38px -16px color-mix(in oklab, var(--ontime) 65%, transparent); }
+@utility glow-late { box-shadow: 0 16px 38px -16px color-mix(in oklab, var(--late) 65%, transparent); }
+
+@utility badge-ink {
+  color: var(--color-bright);
+  text-shadow: 0 1px 0 oklch(0.2 0.05 265 / 45%), 0 4px 22px oklch(0.18 0.06 265 / 60%);
+}
+
+
+/* ---- extra colours (static, no motion) ---- */
+:root {
+  --early: oklch(0.72 0.14 250);
+  --early-deep: oklch(0.55 0.17 265);
+  --gradient-early: linear-gradient(140deg, var(--early), var(--early-deep));
+  --gradient-rainbow: linear-gradient(115deg, var(--badge-morning-a), var(--badge-recess-a) 50%, var(--badge-lunch-a));
+  --wash-rainbow:
+    radial-gradient(55% 45% at 12% 4%, color-mix(in oklab, var(--morning-1) 60%, transparent), transparent 70%),
+    radial-gradient(45% 40% at 88% 8%, color-mix(in oklab, var(--recess-1) 55%, transparent), transparent 72%),
+    radial-gradient(65% 55% at 50% 100%, color-mix(in oklab, var(--lunch-1) 45%, transparent), transparent 75%);
+}
+
+@utility grad-early { background-image: var(--gradient-early); }
+@utility glow-early { box-shadow: 0 16px 38px -16px color-mix(in oklab, var(--early) 65%, transparent); }
+@utility grad-rainbow { background-image: var(--gradient-rainbow); }
+@utility glow-rainbow { box-shadow: 0 22px 55px -18px color-mix(in oklab, var(--badge-lunch-a) 55%, transparent); }
+@utility wash-rainbow { background-image: var(--wash-rainbow); }
+
+
