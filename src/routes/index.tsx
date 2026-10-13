@@ -1,3 +1,4 @@
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
@@ -45,6 +46,13 @@ function Index() {
     return () => clearInterval(t);
   }, []);
 
+  // Close the message window on its own after a few seconds.
+  useEffect(() => {
+    if (!msg) return;
+    const t = setTimeout(() => setMsg(null), 8000);
+    return () => clearTimeout(t);
+  }, [msg]);
+
   if (!now) return null;
   const n = mins(now);
   const period = currentPeriod(n);
@@ -80,7 +88,6 @@ function Index() {
     setRecords(next);
     saveRecords(next);
     setMsg(rec);
-    setTimeout(() => setMsg(null), 6000);
   }
 
   const solid = (late: boolean) =>
@@ -122,17 +129,6 @@ function Index() {
           )}
         </section>
 
-        <div className="w-full max-w-4xl min-h-28 flex">
-          {msg && (
-            <div
-              role="status"
-              className={`w-full rounded-2xl px-8 py-6 text-center text-3xl sm:text-4xl font-bold ${solid(msg.late)}`}
-            >
-              {msg.text}
-            </div>
-          )}
-        </div>
-
         <div className="w-full max-w-4xl grid grid-cols-1 sm:grid-cols-3 gap-4">
           {STUDENTS.map((s) => {
             const rec = records[key(s)];
@@ -155,6 +151,23 @@ function Index() {
           })}
         </div>
       </div>
+
+      <DialogPrimitive.Root open={!!msg} onOpenChange={(o) => !o && setMsg(null)}>
+        <DialogPrimitive.Portal>
+          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/60" />
+          <DialogPrimitive.Content
+            aria-describedby={undefined}
+            className={`fixed left-1/2 top-1/2 z-50 w-[92vw] max-w-3xl -translate-x-1/2 -translate-y-1/2 rounded-3xl p-10 text-center focus:outline-none ${solid(!!msg?.late)}`}
+          >
+            <DialogPrimitive.Title className="text-4xl sm:text-6xl font-bold leading-tight">
+              {msg?.text}
+            </DialogPrimitive.Title>
+            <DialogPrimitive.Close className="mt-10 rounded-2xl bg-background px-10 py-4 text-2xl font-bold text-foreground">
+              OK
+            </DialogPrimitive.Close>
+          </DialogPrimitive.Content>
+        </DialogPrimitive.Portal>
+      </DialogPrimitive.Root>
     </main>
   );
 }
