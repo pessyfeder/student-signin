@@ -42,12 +42,44 @@ export function saveStudents(list: string[]) {
 }
 
 // Returns the updated list, or an error message when the name is empty or already on the list.
-export function addStudent(list: string[], raw: string): { list: string[] } | { error: string } {
+export function addStudent(
+  list: string[],
+  raw: string,
+  archived: string[] = [],
+): { list: string[] } | { error: string } {
   const name = raw.trim().replace(/\s+/g, " ");
   if (!name) return { error: "Please type a name" };
   if (list.some((s) => s.toLowerCase() === name.toLowerCase()))
     return { error: "That student is already on the list" };
+  if (archived.some((s) => s.toLowerCase() === name.toLowerCase()))
+    return { error: "That student is archived. Restore her from the archived list below" };
   return { list: [...list, name] };
+}
+
+const ARCHIVED_KEY = "signin-archived";
+
+// Archived students: off the sign-in page and the attendance view, but their sign-ins are kept
+// (they stay in the CSV and in backups) and she can be restored at any time.
+export function loadArchived(): string[] {
+  try {
+    const saved = JSON.parse(localStorage.getItem(ARCHIVED_KEY) || "null");
+    if (Array.isArray(saved) && saved.every((s) => typeof s === "string")) return saved;
+  } catch {
+    // fall through
+  }
+  return [];
+}
+
+export function saveArchived(list: string[]) {
+  localStorage.setItem(ARCHIVED_KEY, JSON.stringify(list));
+}
+
+export function archiveStudent(students: string[], archived: string[], name: string) {
+  return { students: students.filter((s) => s !== name), archived: [...archived, name] };
+}
+
+export function restoreStudent(students: string[], archived: string[], name: string) {
+  return { students: [...students, name], archived: archived.filter((s) => s !== name) };
 }
 
 // First name only; add the surname initial if another student shares the first name,
@@ -166,8 +198,12 @@ export function recordsToCsv(records: { [k: string]: SignIn }) {
 }
 
 // Full backup (class list + every sign-in) as JSON, restorable from the Admin Backup tab.
-export function makeBackup(students: string[], records: { [k: string]: SignIn }) {
-  return JSON.stringify({ version: 1, students, records }, null, 2);
+export function makeBackup(
+  students: string[],
+  records: { [k: string]: SignIn },
+  archived: string[] = [],
+) {
+  return JSON.stringify({ version: 1, students, archived, records }, null, 2);
 }
 
 // Parses a backup file and merges it into the current data (nothing is deleted).
@@ -175,14 +211,16 @@ export function mergeBackup(
   text: string,
   students: string[],
   records: { [k: string]: SignIn },
-): { students: string[]; records: { [k: string]: SignIn } } | { error: string } {
+  archived: string[] = [],
+):
+  { students: string[]; archived: string[]; records: { [k: string]: SignIn } } | { error: string } {
   let data: unknown;
   try {
     data = JSON.parse(text);
   } catch {
     return { error: "That file is not a valid backup" };
   }
-  const d = data as { students?: unknown; records?: unknown };
+  const d = data as { students?: unknown; archived?: unknown; records?: unknown };
   if (
     !d ||
     !Array.isArray(d.students) ||
@@ -191,10 +229,22 @@ export function mergeBackup(
     d.records === null
   )
     return { error: "That file is not a valid backup" };
+  const known = (s: string, list: string[]) =>
+    list.some((m) => m.toLowerCase() === s.toLowerCase());
+  const fileArchived = Array.isArray(d.archived)
+    ? (d.archived as unknown[]).filter((s): s is string => typeof s === "string")
+    : [];
+  const mergedArchived = [...archived];
+  for (const s of fileArchived)
+    if (!known(s, mergedArchived) && !known(s, students)) mergedArchived.push(s);
   const merged = [...students];
   for (const s of d.students as string[])
-    if (!merged.some((m) => m.toLowerCase() === s.toLowerCase())) merged.push(s);
-  return { students: merged, records: { ...(d.records as object), ...records } };
+    if (!known(s, merged) && !known(s, mergedArchived)) merged.push(s);
+  return {
+    students: merged,
+    archived: mergedArchived,
+    records: { ...(d.records as object), ...records },
+  };
 }
 
 export const windowLabel = (p: Period) => `${fmt(p.start)} → ${fmt(p.end)}`;
@@ -264,8 +314,8 @@ export function buildAttendance(
 ): AttendanceDay[] {
   const days: string[] = [];
   for (const k of Object.keys(records)) {
-    const d = k.split("|")[0] ?? "";
-    if (d && !days.includes(d)) days.push(d);
+    const [d = "", , student = ""] = k.split("|");
+    if (d && students.includes(student) && !days.includes(d)) days.push(d);
   }
   days.sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
 

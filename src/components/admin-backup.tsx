@@ -1,17 +1,26 @@
 import { useState, type ChangeEvent } from "react";
 import { download } from "@/components/admin-attendance";
-import { makeBackup, mergeBackup, saveRecords, saveStudents, type SignIn } from "@/lib/frames";
+import {
+  makeBackup,
+  mergeBackup,
+  saveArchived,
+  saveRecords,
+  saveStudents,
+  type SignIn,
+} from "@/lib/frames";
 
 type Records = { [k: string]: SignIn };
 
 export function AdminBackup({
   students,
+  archived,
   records,
   onRestore,
 }: {
   students: string[];
+  archived: string[];
   records: Records;
-  onRestore: (students: string[], records: Records) => void;
+  onRestore: (students: string[], archived: string[], records: Records) => void;
 }) {
   const [msg, setMsg] = useState("");
   const [bad, setBad] = useState(false);
@@ -19,7 +28,11 @@ export function AdminBackup({
   function save() {
     const d = new Date();
     const stamp = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-    download(`class-signin-backup-${stamp}.json`, makeBackup(students, records), "application/json");
+    download(
+      `class-signin-backup-${stamp}.json`,
+      makeBackup(students, records, archived),
+      "application/json",
+    );
     setBad(false);
     setMsg("Backup downloaded");
   }
@@ -28,15 +41,16 @@ export function AdminBackup({
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
-    const r = mergeBackup(await file.text(), students, records);
+    const r = mergeBackup(await file.text(), students, records, archived);
     if ("error" in r) {
       setBad(true);
       setMsg(r.error);
       return;
     }
     saveStudents(r.students);
+    saveArchived(r.archived);
     saveRecords(r.records);
-    onRestore(r.students, r.records);
+    onRestore(r.students, r.archived, r.records);
     setBad(false);
     setMsg("Backup restored");
   }

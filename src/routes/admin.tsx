@@ -2,10 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import { AdminAttendance } from "@/components/admin-attendance";
 import { AdminBackup } from "@/components/admin-backup";
+import { AdminPassword } from "@/components/admin-password";
 import { AdminStudents } from "@/components/admin-students";
 import {
   hashPassword,
   isUnlocked,
+  loadArchived,
   loadRecords,
   loadStudents,
   type SignIn,
@@ -21,12 +23,13 @@ export const Route = createFileRoute("/admin")({
   component: Admin,
 });
 
-type Tab = "attendance" | "students" | "backup";
+type Tab = "attendance" | "students" | "backup" | "password";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "attendance", label: "View Attendance" },
   { id: "students", label: "Add Student" },
   { id: "backup", label: "Backup" },
+  { id: "password", label: "Change Password" },
 ];
 
 function Admin() {
@@ -37,6 +40,7 @@ function Admin() {
   const [tab, setTab] = useState<Tab>("attendance");
   const [records, setRecords] = useState<{ [k: string]: SignIn }>({});
   const [students, setStudents] = useState<string[]>([]);
+  const [archived, setArchived] = useState<string[]>([]);
 
   useEffect(() => {
     if (isUnlocked(sessionStorage.getItem("teacher-ok"))) setOk(true);
@@ -48,6 +52,7 @@ function Admin() {
     if (!ok) return;
     setRecords(loadRecords());
     setStudents(loadStudents());
+    setArchived(loadArchived());
     const touch = () => sessionStorage.setItem("teacher-ok", String(Date.now()));
     const check = () => {
       if (!isUnlocked(sessionStorage.getItem("teacher-ok"))) lock();
@@ -154,13 +159,24 @@ function Admin() {
           ) : tab === "attendance" ? (
             <AdminAttendance records={records} students={students} />
           ) : tab === "students" ? (
-            <AdminStudents students={students} onChange={setStudents} />
+            <AdminStudents
+              students={students}
+              archived={archived}
+              onChange={(s, a) => {
+                setStudents(s);
+                setArchived(a);
+              }}
+            />
+          ) : tab === "password" ? (
+            <AdminPassword />
           ) : (
             <AdminBackup
               students={students}
+              archived={archived}
               records={records}
-              onRestore={(s, r) => {
+              onRestore={(s, a, r) => {
                 setStudents(s);
+                setArchived(a);
                 setRecords(r);
               }}
             />
