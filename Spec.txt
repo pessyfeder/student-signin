@@ -1,0 +1,25 @@
+App: 
+Web app 
+
+sign-in app for three students: 
+
+Hindy Fisch
+Mindy Katina
+Esty Oberlander
+
+sign-in timings: 
+1. Arrival (Good Morning) 10:00 -> 10:15
+2. After recess 11:28 -> 11:33
+3. After lunch 1:25
+
+have three large buttons with students' names. 
+
+teacher enables / disables with password. 
+
+when student signs in, message: 
+"Good Morning / Good day / Good Afternoon, Student Name (adjust based on timing)! You signed in x min early / late 
+color code the buttons and message green if within allotted time frame, red if after. turn back to green when next time frame start time arrives
+
+QUESTIONS:
+Should we allow sign-in at all after allotted time frame finishes? If yes, for how long?
+should timings update automatically or teacher-enabled/disabled?

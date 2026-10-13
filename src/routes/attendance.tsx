@@ -7,6 +7,7 @@ import {
   hashPassword,
   loadRecords,
   recordStatus,
+  saveRecords,
   windowLabel,
   type SignIn,
   type Status,
@@ -16,9 +17,15 @@ export const Route = createFileRoute("/attendance")({
   head: () => ({
     meta: [
       { title: "Teacher Attendance" },
-      { name: "description", content: "Student arrival times with on time, early and late sign-ins." },
+      {
+        name: "description",
+        content: "Student arrival times with on time, early and late sign-ins.",
+      },
       { property: "og:title", content: "Teacher Attendance" },
-      { property: "og:description", content: "Student arrival times with on time, early and late sign-ins." },
+      {
+        property: "og:description",
+        content: "Student arrival times with on time, early and late sign-ins.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -56,6 +63,14 @@ function Attendance() {
 
   const days = useMemo(() => buildAttendance(records), [records]);
 
+  function clearRecord(day: string, periodId: string, student: string) {
+    if (!window.confirm(`Clear ${student}'s sign-in?`)) return;
+    const next = { ...records };
+    delete next[`${day}|${periodId}|${student}`];
+    setRecords(next);
+    saveRecords(next);
+  }
+
   async function submit(e: FormEvent) {
     e.preventDefault();
     const typed = pw.trim();
@@ -89,7 +104,10 @@ function Attendance() {
       </header>
 
       {!checked ? null : !ok ? (
-        <form onSubmit={submit} className="w-full max-w-md rounded-3xl border border-border bg-card p-7">
+        <form
+          onSubmit={submit}
+          className="w-full max-w-md rounded-3xl border border-border bg-card p-7"
+        >
           <label htmlFor="teacher-pw" className="block text-2xl font-black">
             Teacher password
           </label>
@@ -132,7 +150,9 @@ function Attendance() {
                 const tone = TONES[f.period.tone];
                 return (
                   <div key={f.period.id} className="rounded-3xl border border-border bg-card p-5">
-                    <span className={`inline-block rounded-full px-4 py-1.5 text-xl font-black text-bright ${tone.badge}`}>
+                    <span
+                      className={`inline-block rounded-full px-4 py-1.5 text-xl font-black text-bright ${tone.badge}`}
+                    >
                       {f.period.frame}
                     </span>
                     <p className="mt-3 text-sm font-bold text-muted-foreground">
@@ -150,11 +170,20 @@ function Attendance() {
                         >
                           <span className="text-lg font-bold">{r.student}</span>
                           {r.rec ? (
-                            <span
-                              className={`rounded-full px-3 py-1 text-sm font-black text-bright ${CHIP[recordStatus(r.rec)]}`}
-                            >
-                              {r.rec.at ? `${r.rec.at} · ` : ""}
-                              {CHIP_LABEL[recordStatus(r.rec)]}
+                            <span className="flex items-center gap-2">
+                              <span
+                                className={`rounded-full px-3 py-1 text-sm font-black text-bright ${CHIP[recordStatus(r.rec)]}`}
+                              >
+                                {r.rec.at ? `${r.rec.at} · ` : ""}
+                                {CHIP_LABEL[recordStatus(r.rec)]}
+                              </span>
+                              <button
+                                onClick={() => clearRecord(d.day, f.period.id, r.student)}
+                                aria-label={`Clear ${r.student}'s sign-in`}
+                                className="rounded-full bg-background px-2 py-1 text-sm font-bold text-muted-foreground underline"
+                              >
+                                Clear
+                              </button>
                             </span>
                           ) : (
                             <span className="rounded-full bg-background px-3 py-1 text-sm font-bold text-muted-foreground">
