@@ -91,22 +91,27 @@ function Index() {
   return (
     <main className="min-h-screen flex flex-col items-center px-6 py-10 gap-8">
       <header className="text-center">
-        <p className="text-6xl font-bold tabular-nums">
+        <p className="text-8xl sm:text-9xl font-bold tabular-nums leading-none">
           {now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
         </p>
-        <p className="mt-2 text-xl text-muted-foreground">
-          {period.greet} sign-in · {fmt(period.start)}
+        <p className="mt-5 text-6xl sm:text-7xl font-bold leading-tight">
+          {period.greet}
+        </p>
+        <p className="mt-3 text-2xl text-muted-foreground">
+          sign-in · {fmt(period.start)}
           {period.end !== period.start && `–${fmt(period.end)}`}
         </p>
       </header>
 
+
       {msg && (
-        <div className={`w-full max-w-3xl rounded-2xl p-6 text-center text-3xl font-semibold ${msg.late ? "bg-late text-late-foreground" : "bg-ontime text-ontime-foreground"}`}>
+        <div className={`w-full max-w-4xl rounded-2xl p-8 text-center text-5xl font-semibold ${msg.late ? "bg-late text-late-foreground" : "bg-ontime text-ontime-foreground"}`}>
           {msg.text}
         </div>
+
       )}
 
-      <div className="w-full max-w-3xl flex flex-col gap-5">
+      <div className="w-full max-w-4xl flex flex-row items-stretch gap-4">
         {STUDENTS.map((s) => {
           const rec = records[key(s)];
           const late = rec ? rec.late : isLate;
@@ -115,14 +120,15 @@ function Index() {
               key={s}
               disabled={!enabled || !!rec}
               onClick={() => signIn(s)}
-              className={`rounded-3xl py-10 text-4xl font-bold shadow-lg transition active:scale-95 disabled:opacity-60 ${late ? "bg-late text-late-foreground" : "bg-ontime text-ontime-foreground"}`}
+              className={`flex-1 min-w-0 rounded-2xl px-3 py-5 text-xl font-bold shadow-lg transition active:scale-95 disabled:opacity-60 ${late ? "bg-late text-late-foreground" : "bg-ontime text-ontime-foreground"}`}
             >
               {s}
-              {rec && <span className="block text-lg font-medium mt-2">✓ Signed in</span>}
+              {rec && <span className="block text-sm font-medium mt-1">✓ Signed in</span>}
             </button>
           );
         })}
       </div>
+
 
       <button onClick={toggle} className="mt-auto text-sm underline text-muted-foreground">
         {enabled ? "Teacher: disable sign-in" : "Teacher: enable sign-in"}
