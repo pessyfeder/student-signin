@@ -173,9 +173,16 @@
   --ontime-deep: oklch(0.5 0.15 155);
   --late-deep: oklch(0.47 0.18 25);
 
-  --gradient-morning: linear-gradient(115deg, var(--morning-1), var(--morning-2) 55%, var(--morning-3));
-  --gradient-recess: linear-gradient(115deg, var(--recess-1), var(--recess-2) 55%, var(--recess-3));
-  --gradient-lunch: linear-gradient(115deg, var(--lunch-1), var(--lunch-2) 55%, var(--lunch-3));
+  --badge-morning-a: oklch(0.73 0.17 58);
+  --badge-morning-b: oklch(0.57 0.19 22);
+  --badge-recess-a: oklch(0.72 0.14 190);
+  --badge-recess-b: oklch(0.55 0.16 235);
+  --badge-lunch-a: oklch(0.72 0.17 350);
+  --badge-lunch-b: oklch(0.55 0.19 305);
+  --gradient-morning: linear-gradient(115deg, var(--badge-morning-a), var(--badge-morning-b));
+  --gradient-recess: linear-gradient(115deg, var(--badge-recess-a), var(--badge-recess-b));
+  --gradient-lunch: linear-gradient(115deg, var(--badge-lunch-a), var(--badge-lunch-b));
+
   --gradient-clock-morning: linear-gradient(120deg, var(--morning-2), var(--morning-3));
   --gradient-clock-recess: linear-gradient(120deg, var(--recess-2), var(--recess-3));
   --gradient-clock-lunch: linear-gradient(120deg, var(--lunch-2), var(--lunch-3));
@@ -246,8 +253,9 @@
 
 @utility badge-ink {
   color: var(--color-bright);
-  text-shadow: 0 3px 18px oklch(0.22 0.06 265 / 45%);
+  text-shadow: 0 1px 0 oklch(0.2 0.05 265 / 45%), 0 4px 22px oklch(0.18 0.06 265 / 60%);
 }
+
 
 @utility shine {
   position: relative;

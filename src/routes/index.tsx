@@ -118,7 +118,7 @@ function Index() {
         <p className={`text-8xl sm:text-9xl font-black tabular-nums leading-none ${tone.clock}`}>
           {now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
         </p>
-        <p className="mt-7 text-sm font-bold uppercase tracking-[0.4em] text-muted-foreground">Right now</p>
+        <p className="mt-7 text-sm font-extrabold uppercase tracking-[0.4em] text-foreground/70">Right now</p>
         <div key={period.frame} className={`mt-3 inline-block px-10 py-5 rounded-[2.5rem] shine pop-in ${tone.badge}`}>
           <span className="bob inline-block text-6xl sm:text-7xl font-black tracking-tight badge-ink">
             {period.frame}
