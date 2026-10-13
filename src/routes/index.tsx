@@ -23,9 +23,9 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Class Sign-In" },
+      { title: "High School Class Sign-In" },
       { name: "description", content: "Student sign-in for arrival, recess and lunch." },
-      { property: "og:title", content: "Class Sign-In" },
+      { property: "og:title", content: "High School Class Sign-In" },
       { property: "og:description", content: "Student sign-in for arrival, recess and lunch." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -88,13 +88,10 @@ function Index() {
     <main className="min-h-screen bg-muted p-3 sm:p-5 text-foreground">
       <div className="flex min-h-[calc(100vh-1.5rem)] sm:min-h-[calc(100vh-2.5rem)] flex-col overflow-hidden rounded-3xl border-4 border-frame bg-background">
         <header className="flex items-center justify-between gap-4 border-b border-border px-6 py-4">
-          <h1 className="text-lg font-bold">Class Sign-In</h1>
+          <h1 className="text-lg font-bold">High School Class Sign-In</h1>
           <nav className="flex items-center gap-5 text-sm font-semibold">
-            <Link to="/attendance" className="text-muted-foreground hover:text-foreground">
-              View attendance
-            </Link>
-            <Link to="/students" className="text-muted-foreground hover:text-foreground">
-              Add student
+            <Link to="/admin" className="text-muted-foreground hover:text-foreground">
+              Admin
             </Link>
           </nav>
         </header>

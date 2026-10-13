@@ -165,6 +165,38 @@ export function recordsToCsv(records: { [k: string]: SignIn }) {
   return ["Date,Window,Student,Time,Status", ...lines].join("\n") + "\n";
 }
 
+// Full backup (class list + every sign-in) as JSON, restorable from the Admin Backup tab.
+export function makeBackup(students: string[], records: { [k: string]: SignIn }) {
+  return JSON.stringify({ version: 1, students, records }, null, 2);
+}
+
+// Parses a backup file and merges it into the current data (nothing is deleted).
+export function mergeBackup(
+  text: string,
+  students: string[],
+  records: { [k: string]: SignIn },
+): { students: string[]; records: { [k: string]: SignIn } } | { error: string } {
+  let data: unknown;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    return { error: "That file is not a valid backup" };
+  }
+  const d = data as { students?: unknown; records?: unknown };
+  if (
+    !d ||
+    !Array.isArray(d.students) ||
+    !d.students.every((s) => typeof s === "string") ||
+    typeof d.records !== "object" ||
+    d.records === null
+  )
+    return { error: "That file is not a valid backup" };
+  const merged = [...students];
+  for (const s of d.students as string[])
+    if (!merged.some((m) => m.toLowerCase() === s.toLowerCase())) merged.push(s);
+  return { students: merged, records: { ...(d.records as object), ...records } };
+}
+
 export const windowLabel = (p: Period) => `${fmt(p.start)} → ${fmt(p.end)}`;
 
 // Hand angles in degrees (0 = 12 o'clock, clockwise) for a time in minutes since midnight.
