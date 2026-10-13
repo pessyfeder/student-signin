@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
+  LATE_GRACE,
   PERIODS,
   TONES,
   clockLabel,
@@ -119,7 +120,9 @@ function Index() {
             </p>
             <p className="mt-5 text-2xl font-medium text-muted-foreground">
               {period
-                ? `Sign-in closes at ${fmt(period.end)}`
+                ? isLate
+                  ? `Late sign-in until ${fmt(period.end + LATE_GRACE)}`
+                  : `Sign-in closes at ${fmt(period.end)}`
                 : upcoming
                   ? `Sign-in opens at ${fmt(upcoming.start)}`
                   : "Sign-in is closed"}

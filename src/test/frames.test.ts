@@ -17,7 +17,7 @@ const [arrival, recess, lunch] = PERIODS;
 
 describe("currentPeriod", () => {
   it("is closed before 10:00", () => expect(currentPeriod(t(9, 59))).toBeNull());
-  it("opens at each start time and closes after the end minute", () => {
+  it("opens at each start time and closes 10 minutes after the end time", () => {
     const windows: [string, [number, number], [number, number]][] = [
       ["arrival", [10, 0], [10, 15]],
       ["recess", [12, 0], [12, 5]],
@@ -25,20 +25,22 @@ describe("currentPeriod", () => {
       ["recess2", [15, 25], [15, 30]],
     ];
     for (const [id, [sh, sm], [eh, em]] of windows) {
+      const close = eh * 60 + em + 10;
       expect(currentPeriod(t(sh, sm))?.id).toBe(id);
       expect(currentPeriod(t(eh, em, 59))?.id).toBe(id);
-      expect(currentPeriod(t(eh, em + 1))).toBeNull();
+      expect(currentPeriod(close + 59 / 60)?.id).toBe(id);
+      expect(currentPeriod(close + 1)).toBeNull();
     }
   });
   it("is closed between windows", () => {
     expect(currentPeriod(t(11, 0))).toBeNull();
-    expect(currentPeriod(t(12, 6))).toBeNull();
+    expect(currentPeriod(t(12, 16))).toBeNull();
     expect(currentPeriod(t(14, 0))).toBeNull();
   });
-  it("is closed after 3:30 PM and stays closed", () => {
-    expect(currentPeriod(t(15, 31))).toBeNull();
+  it("is closed after the last window and stays closed", () => {
+    expect(currentPeriod(t(15, 41))).toBeNull();
     expect(currentPeriod(t(21, 12))).toBeNull();
-    expect(nextPeriod(t(15, 31))).toBeNull();
+    expect(nextPeriod(t(15, 41))).toBeNull();
   });
 });
 
