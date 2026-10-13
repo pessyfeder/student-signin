@@ -29,6 +29,18 @@ export function download(name: string, text: string, type: string) {
   URL.revokeObjectURL(url);
 }
 
+const weekLabel = (day: string) => {
+  const d = new Date(day);
+  return Number.isNaN(d.getTime())
+    ? day
+    : d.toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      });
+};
+
 const cell = "border border-border px-4 py-3 align-top";
 
 export function AdminAttendance({
@@ -67,58 +79,6 @@ export function AdminAttendance({
       ) : (
         weeks.map((w) => (
           <div key={w.start} className="flex w-full max-w-5xl flex-col gap-8">
-            <section>
-              <h2 className="text-xl font-bold">Week of {dayLabel(w.start)}</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Earliest sign-in this week for each window, compared with the window's end time.
-              </p>
-              <div className="mt-3 overflow-x-auto">
-                <table className="w-full border-collapse border border-border text-left text-sm">
-                  <thead>
-                    <tr className="bg-muted">
-                      <th scope="col" className={`${cell} font-bold`}>
-                        Earliest arrival
-                      </th>
-                      {PERIODS.map((p) => (
-                        <th key={p.id} scope="col" className={cell}>
-                          <span className="block font-bold">{p.frame}</span>
-                          <span className="block font-normal text-muted-foreground">
-                            Ends {fmt(p.end)}
-                          </span>
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {earliestArrivals(
-                      records,
-                      students,
-                      w.days.map((d) => d.day),
-                    ).map((row) => (
-                      <tr key={row.student}>
-                        <th scope="row" className={`${cell} font-bold`}>
-                          {row.student}
-                        </th>
-                        {row.cells.map((c, i) => (
-                          <td key={PERIODS[i]!.id} className={cell}>
-                            {c ? (
-                              <>
-                                <span className="block tabular-nums">{c.at}</span>
-                                <span className="block text-muted-foreground">
-                                  {beforeEndLabel(c.before)}
-                                </span>
-                              </>
-                            ) : (
-                              <span className="text-muted-foreground">No sign-ins</span>
-                            )}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
             {w.days.map((d) => (
               <section key={d.day}>
                 <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
@@ -195,6 +155,58 @@ export function AdminAttendance({
                 </div>
               </section>
             ))}
+            <section>
+              <h2 className="text-xl font-bold">Week of {weekLabel(w.start)} - Earliest Arrival</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Earliest sign-in this week for each window, compared with the window's end time.
+              </p>
+              <div className="mt-3 overflow-x-auto">
+                <table className="w-full border-collapse border border-border text-left text-sm">
+                  <thead>
+                    <tr className="bg-muted">
+                      <th scope="col" className={`${cell} font-bold`}>
+                        Student
+                      </th>
+                      {PERIODS.map((p) => (
+                        <th key={p.id} scope="col" className={cell}>
+                          <span className="block font-bold">{p.frame}</span>
+                          <span className="block font-normal text-muted-foreground">
+                            Ends {fmt(p.end)}
+                          </span>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {earliestArrivals(
+                      records,
+                      students,
+                      w.days.map((d) => d.day),
+                    ).map((row) => (
+                      <tr key={row.student}>
+                        <th scope="row" className={`${cell} font-bold`}>
+                          {row.student}
+                        </th>
+                        {row.cells.map((c, i) => (
+                          <td key={PERIODS[i]!.id} className={cell}>
+                            {c ? (
+                              <>
+                                <span className="block tabular-nums">{c.at}</span>
+                                <span className="block text-muted-foreground">
+                                  {beforeEndLabel(c.before)}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="text-muted-foreground">No sign-ins</span>
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
           </div>
         ))
       )}
