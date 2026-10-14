@@ -6,7 +6,17 @@ import { createHash } from "node:crypto";
 import { join, relative } from "node:path";
 
 const out = "offline";
-rmSync(out, { recursive: true, force: true });
+// Empty the folder rather than deleting it: Windows refuses to delete a folder that a running
+// launcher window is sitting in.
+mkdirSync(out, { recursive: true });
+try {
+  for (const f of readdirSync(out)) rmSync(join(out, f), { recursive: true, force: true });
+} catch (e) {
+  console.error(
+    `\nCould not clear ./offline (${e.code}). Close the Sign-In server window if it is running, then try again.`,
+  );
+  process.exit(1);
+}
 execSync("npx vite build", {
   stdio: "inherit",
   env: { ...process.env, OFFLINE_BUILD: "1", VITE_OFFLINE_BUILD: "1" },
