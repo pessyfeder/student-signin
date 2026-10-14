@@ -112,7 +112,7 @@ export const TOUR: { minutes: number; text: string }[] = [
   { minutes: 805, text: "1:25 PM. After Lunch opens." },
   { minutes: 925, text: "3:25 PM. After English Recess, the last window of the day." },
   {
-    minutes: 940,
-    text: "3:40 PM. The day is over. Open Admin (password demo) to see the attendance.",
+    minutes: 945,
+    text: "3:45 PM. The day is over. Open Admin (password demo) to see the attendance.",
   },
 ];
