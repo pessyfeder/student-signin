@@ -205,6 +205,16 @@ export function recordsToCsv(records: { [k: string]: SignIn }) {
   return ["Date,Window,Student,Time,Status", ...lines].join("\n") + "\n";
 }
 
+const SIGNIN_LOCK_KEY = "signin-locked";
+
+// The teacher's Lock button turns student sign-in off until the teacher next unlocks Admin.
+export const isSignInLocked = () => localStorage.getItem(SIGNIN_LOCK_KEY) === "1";
+
+export function setSignInLocked(locked: boolean) {
+  if (locked) localStorage.setItem(SIGNIN_LOCK_KEY, "1");
+  else localStorage.removeItem(SIGNIN_LOCK_KEY);
+}
+
 const LAST_BACKUP_KEY = "signin-last-backup";
 const BACKUP_SINCE_KEY = "signin-backup-since";
 export const BACKUP_EVERY_MS = 7 * 24 * 60 * 60 * 1000;

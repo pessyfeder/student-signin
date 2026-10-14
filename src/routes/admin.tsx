@@ -11,6 +11,7 @@ import {
   loadArchived,
   loadRecords,
   loadStudents,
+  setSignInLocked,
   type SignIn,
 } from "@/lib/frames";
 
@@ -93,6 +94,7 @@ function Admin() {
       return;
     }
     sessionStorage.setItem("teacher-ok", String(Date.now()));
+    setSignInLocked(false);
     setErr("");
     setOk(true);
   }
@@ -119,7 +121,13 @@ function Admin() {
                 </button>
               ))}
             {ok && (
-              <button onClick={lock} className="text-muted-foreground hover:text-foreground">
+              <button
+                onClick={() => {
+                  setSignInLocked(true);
+                  lock();
+                }}
+                className="text-muted-foreground hover:text-foreground"
+              >
                 Lock
               </button>
             )}

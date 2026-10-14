@@ -10,6 +10,7 @@ import {
   clockLabel,
   fmt,
   currentPeriod,
+  isSignInLocked,
   displayName,
   evaluateSignIn,
   nextPeriod,
@@ -39,18 +40,24 @@ function Index() {
   const [records, setRecords] = useState<{ [k: string]: SignIn }>({});
   const [msg, setMsg] = useState<SignIn | null>(null);
   const [students, setStudents] = useState<string[]>([]);
+  const [locked, setLocked] = useState(false);
 
   useEffect(() => {
     setNow(new Date());
     setStudents(loadStudents());
     setRecords(loadRecords());
-    const t = setInterval(() => setNow(new Date()), 1000);
+    setLocked(isSignInLocked());
+    const t = setInterval(() => {
+      setNow(new Date());
+      setLocked(isSignInLocked());
+    }, 1000);
     return () => clearInterval(t);
   }, []);
 
   if (!now) return null;
   const n = mins(now);
-  const period = currentPeriod(n);
+  // The teacher's Lock button closes sign-in regardless of the schedule.
+  const period = locked ? null : currentPeriod(n);
   const upcoming = nextPeriod(n);
   const tone = TONES[(period ?? upcoming ?? PERIODS[0]!).tone];
   const isLate = period ? evaluateSignIn(period, n).late : false;
@@ -123,9 +130,11 @@ function Index() {
                 ? isLate
                   ? `Late sign-in until ${fmt(period.end + LATE_GRACE)}`
                   : `Sign-in closes at ${fmt(period.end)}`
-                : upcoming
-                  ? `Sign-in opens at ${fmt(upcoming.start)}`
-                  : "Sign-in is closed"}
+                : locked
+                  ? "Sign-in is locked by the teacher"
+                  : upcoming
+                    ? `Sign-in opens at ${fmt(upcoming.start)}`
+                    : "Sign-in is closed"}
             </p>
           </section>
 
