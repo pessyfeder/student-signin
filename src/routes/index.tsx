@@ -32,10 +32,17 @@ export const Route = createFileRoute("/")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: Index,
+  component: () => <SignInPage />,
 });
 
-function Index() {
+// Also used by the demo, which swaps in a simulated clock and its own Admin link.
+export function SignInPage({
+  adminTo = "/admin",
+  getNow = () => new Date(),
+}: {
+  adminTo?: "/admin" | "/demo/admin";
+  getNow?: () => Date;
+}) {
   const [now, setNow] = useState<Date | null>(null);
   const [records, setRecords] = useState<{ [k: string]: SignIn }>({});
   const [msg, setMsg] = useState<SignIn | null>(null);
@@ -43,12 +50,12 @@ function Index() {
   const [locked, setLocked] = useState(false);
 
   useEffect(() => {
-    setNow(new Date());
+    setNow(getNow());
     setStudents(loadStudents());
     setRecords(loadRecords());
     setLocked(isSignInLocked());
     const t = setInterval(() => {
-      setNow(new Date());
+      setNow(getNow());
       setLocked(isSignInLocked());
     }, 1000);
     return () => clearInterval(t);
@@ -97,7 +104,7 @@ function Index() {
         <header className="flex items-center justify-between gap-4 border-b border-border px-6 py-4">
           <h1 className="text-lg font-bold">High School Class Sign-In</h1>
           <nav className="flex items-center gap-5 text-sm font-semibold">
-            <Link to="/admin" className="text-muted-foreground hover:text-foreground">
+            <Link to={adminTo} className="text-muted-foreground hover:text-foreground">
               Admin
             </Link>
           </nav>

@@ -22,7 +22,7 @@ export const Route = createFileRoute("/admin")({
       { name: "description", content: "Teacher admin: attendance, students and backup." },
     ],
   }),
-  component: Admin,
+  component: () => <Admin />,
 });
 
 type Tab = "attendance" | "students" | "backup" | "password";
@@ -34,7 +34,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "password", label: "Change Password" },
 ];
 
-function Admin() {
+export function Admin({ backTo = "/" }: { backTo?: "/" | "/demo" }) {
   const [ok, setOk] = useState(false);
   const [checked, setChecked] = useState(false);
   const [pw, setPw] = useState("");
@@ -131,7 +131,7 @@ function Admin() {
                 Lock
               </button>
             )}
-            <Link to="/" className="text-muted-foreground hover:text-foreground">
+            <Link to={backTo} className="text-muted-foreground hover:text-foreground">
               Back to sign-in
             </Link>
           </nav>
