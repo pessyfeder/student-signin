@@ -86,18 +86,33 @@ export function installDemoStorage() {
   };
 }
 
-export type DemoWhen = { periodId: string; arrival: "early" | "ontime" | "late" } | null;
+let simulated: number | null = null;
 
-let when: DemoWhen = null;
-export const setDemoWhen = (w: DemoWhen) => {
-  when = w;
+// Minutes since midnight for the demo tour's current step, or null to use the real clock.
+export const setDemoMinutes = (m: number | null) => {
+  simulated = m;
 };
 
-// The clock the demo's sign-in page uses: the real time, or a simulated moment in a window.
-export function demoNow(): Date {
-  const p = PERIODS.find((x) => x.id === when?.periodId);
-  if (!when || !p) return new Date();
-  const m =
-    when.arrival === "early" ? p.start : when.arrival === "ontime" ? p.end + 0.5 : p.end + 4.5;
-  return dateAt(m);
-}
+// The clock the demo's sign-in page uses.
+export const demoNow = (): Date => (simulated === null ? new Date() : dateAt(simulated));
+
+export const TOUR: { minutes: number; text: string }[] = [
+  { minutes: 595, text: "9:55 AM. It's before school, so sign-in is closed. It opens at 10:00." },
+  { minutes: 600, text: "10:00 AM. The Good Morning window opens. Tap a name to sign in: early." },
+  {
+    minutes: 615,
+    text: "10:15 AM. The last minute of the window. Signing in now is right on time.",
+  },
+  {
+    minutes: 620,
+    text: "10:20 AM. Past the cutoff, students can still sign in for 10 minutes, marked late.",
+  },
+  { minutes: 640, text: "10:40 AM. The window has closed until recess." },
+  { minutes: 720, text: "12:00 PM. After Yiddish Recess opens." },
+  { minutes: 805, text: "1:25 PM. After Lunch opens." },
+  { minutes: 925, text: "3:25 PM. After English Recess, the last window of the day." },
+  {
+    minutes: 940,
+    text: "3:40 PM. The day is over. Open Admin (password demo) to see the attendance.",
+  },
+];
