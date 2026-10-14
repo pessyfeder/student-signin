@@ -42,6 +42,9 @@ export function saveStudents(list: string[]) {
   localStorage.setItem(STUDENTS_KEY, JSON.stringify(list));
 }
 
+// Letters (any language, with accents), spaces between words, apostrophes and hyphens only.
+const VALID_NAME = /^[\p{L}\p{M}'’ -]+$/u;
+
 // Returns the updated list, or an error message when the name is empty or already on the list.
 export function addStudent(
   list: string[],
@@ -50,6 +53,8 @@ export function addStudent(
 ): { list: string[] } | { error: string } {
   const name = raw.trim().replace(/\s+/g, " ");
   if (!name) return { error: "Please type a name" };
+  if (!VALID_NAME.test(name))
+    return { error: "Names can only have letters, spaces, apostrophes and hyphens" };
   if (list.some((s) => s.toLowerCase() === name.toLowerCase()))
     return { error: "That student is already on the list" };
   if (archived.some((s) => s.toLowerCase() === name.toLowerCase()))

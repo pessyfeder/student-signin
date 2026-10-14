@@ -15,6 +15,7 @@ import {
   currentPeriod,
   evaluateSignIn,
   nextPeriod,
+  addStudent,
 } from "@/lib/frames";
 
 const t = (h: number, m: number, s = 0) => h * 60 + m + s / 60;
@@ -178,5 +179,18 @@ describe("weekly earliest arrival", () => {
     );
     expect(row?.cells[0]).toEqual({ at: "10:02 AM", before: 13 });
     expect(row?.cells[1]).toBeNull();
+  });
+});
+
+describe("addStudent name rules", () => {
+  const ok = (n: string) => "list" in addStudent([], n);
+  it("accepts letters, spaces, apostrophes and hyphens", () => {
+    expect(ok("Rivka Stein")).toBe(true);
+    expect(ok("Sarah-Leah O'Brien")).toBe(true);
+    expect(ok("Chaya’le Müller")).toBe(true);
+  });
+  it("rejects digits and other symbols", () => {
+    for (const n of ["Rivka2", "Rivka_S", "Rivka.", "R!vka", "Rivka@home", "Rivka, S", "Rivka 😀"])
+      expect(addStudent([], n)).toHaveProperty("error");
   });
 });
