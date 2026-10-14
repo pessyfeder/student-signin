@@ -172,19 +172,6 @@ export function AdminAttendance({
                         </tr>
                       ))}
                     </tbody>
-                    <tfoot>
-                      <tr className="bg-muted">
-                        <th scope="row" className={`${cell} font-bold`}>
-                          Totals
-                        </th>
-                        {d.frames.map((f) => (
-                          <td key={f.period.id} className={`${cell} text-muted-foreground`}>
-                            {f.counts.early + f.counts.ontime} on time, {f.counts.late} late,{" "}
-                            {f.counts.missing} missing
-                          </td>
-                        ))}
-                      </tr>
-                    </tfoot>
                   </table>
                 </div>
               </section>
