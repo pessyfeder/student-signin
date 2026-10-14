@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { DEMO_ONLY } from "@/lib/demo-config";
 import { useEffect, useState, type FormEvent } from "react";
 import { AdminAttendance } from "@/components/admin-attendance";
 import { AdminBackup } from "@/components/admin-backup";
@@ -16,6 +17,9 @@ import {
 } from "@/lib/frames";
 
 export const Route = createFileRoute("/admin")({
+  beforeLoad: () => {
+    if (DEMO_ONLY) throw redirect({ to: "/demo/admin" });
+  },
   head: () => ({
     meta: [
       { title: "Admin" },
@@ -100,8 +104,8 @@ export function Admin({ backTo = "/" }: { backTo?: "/" | "/demo" }) {
   }
 
   return (
-    <main className="min-h-screen bg-muted p-3 sm:p-5 text-foreground">
-      <div className="flex min-h-[calc(100vh-1.5rem)] sm:min-h-[calc(100vh-2.5rem)] flex-col overflow-hidden rounded-3xl border-4 border-frame bg-background">
+    <main className="min-h-[var(--app-h,100dvh)] bg-muted p-3 sm:p-5 text-foreground">
+      <div className="flex min-h-[calc(var(--app-h,100dvh)-1.5rem)] sm:min-h-[calc(var(--app-h,100dvh)-2.5rem)] flex-col overflow-hidden rounded-3xl border-4 border-frame bg-background">
         <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-border px-6 py-4">
           <h1 className="text-lg font-bold">Admin</h1>
           <nav className="flex flex-wrap items-center gap-5 text-sm font-semibold">

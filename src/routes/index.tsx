@@ -1,7 +1,8 @@
+import { DEMO_ONLY } from "@/lib/demo-config";
 import { AnalogClock } from "@/components/analog-clock";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   LATE_GRACE,
@@ -22,6 +23,9 @@ import {
 } from "@/lib/frames";
 
 export const Route = createFileRoute("/")({
+  beforeLoad: () => {
+    if (DEMO_ONLY) throw redirect({ to: "/demo" });
+  },
   head: () => ({
     meta: [
       { title: "High School Class Sign-In" },
@@ -99,8 +103,8 @@ export function SignInPage({
       : "border-4 border-ontime-border bg-ontime text-ontime-foreground";
 
   return (
-    <main className="min-h-screen bg-muted p-3 sm:p-5 text-foreground">
-      <div className="flex min-h-[calc(100vh-1.5rem)] sm:min-h-[calc(100vh-2.5rem)] flex-col overflow-hidden rounded-3xl border-4 border-frame bg-background">
+    <main className="h-[var(--app-h,100dvh)] overflow-hidden bg-muted p-3 sm:p-5 text-foreground">
+      <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-3xl border-4 border-frame bg-background">
         <header className="flex items-center justify-between gap-4 border-b border-border px-6 py-4">
           <h1 className="text-lg font-bold">High School Class Sign-In</h1>
           <nav className="flex items-center gap-5 text-sm font-semibold">
@@ -110,29 +114,29 @@ export function SignInPage({
           </nav>
         </header>
 
-        <div className="flex-1 flex flex-col items-center justify-center gap-10 px-6 py-10">
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-[2vh] px-6 py-[2vh]">
           <section className="text-center">
             <div className="flex justify-center">
-              <AnalogClock minutes={n} />
+              <AnalogClock minutes={n} className="h-[14vh] w-[14vh]" />
             </div>
-            <p className="mt-4 text-8xl sm:text-9xl font-black tabular-nums leading-none">
+            <p className="mt-[1.5vh] whitespace-nowrap text-[min(9.5vh,15vw)] font-black tabular-nums leading-none">
               {now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
             </p>
-            <p className="mt-3 text-2xl font-semibold text-muted-foreground">
+            <p className="mt-[1vh] text-[min(2.6vh,4.5vw)] font-semibold text-muted-foreground">
               {now.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" })}
             </p>
             <p
-              className={`mt-8 inline-flex items-center gap-6 rounded-3xl px-10 py-4 text-6xl sm:text-7xl font-black tracking-tight border-4 border-current ${tone.chip}`}
+              className={`mt-[1.5vh] inline-flex items-center gap-[2vw] rounded-3xl px-[3vw] py-[1vh] text-[min(5.5vh,6vw)] font-black tracking-tight border-4 border-current ${tone.chip}`}
             >
-              <span aria-hidden className="text-7xl sm:text-8xl leading-none">
+              <span aria-hidden className="text-[min(6vh,7vw)] leading-none">
                 {period ? period.emoji : "🔒"}
               </span>
               {period ? period.frame : "Sign-in closed"}
-              <span aria-hidden className="text-7xl sm:text-8xl leading-none">
+              <span aria-hidden className="text-[min(6vh,7vw)] leading-none">
                 {period ? period.emoji : "🔒"}
               </span>
             </p>
-            <p className="mt-5 text-2xl font-medium text-muted-foreground">
+            <p className="mt-[1.5vh] text-[min(2.4vh,4.5vw)] font-medium text-muted-foreground">
               {period
                 ? isLate
                   ? `Late sign-in until ${fmt(period.end + LATE_GRACE)}`
@@ -145,7 +149,7 @@ export function SignInPage({
             </p>
           </section>
 
-          <div className="w-full max-w-4xl grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="min-h-0 w-full max-w-4xl grid grid-cols-2 sm:grid-cols-3 gap-[1.5vh] overflow-y-auto">
             {students.map((s) => {
               const rec = records[key(s)];
               return (
@@ -153,7 +157,7 @@ export function SignInPage({
                   key={s}
                   disabled={!open || !!rec}
                   onClick={() => signIn(s)}
-                  className="rounded-2xl px-4 py-6 text-2xl font-bold disabled:opacity-50 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-ring border-4 border-frame bg-early text-early-foreground"
+                  className="rounded-2xl px-4 py-[1.5vh] text-[min(2.8vh,4.5vw)] font-bold disabled:opacity-50 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-ring border-4 border-frame bg-early text-early-foreground"
                 >
                   {s}
                   {rec && (

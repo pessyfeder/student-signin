@@ -29,9 +29,9 @@ function DemoLayout() {
 
   const sel = "rounded-md border border-border bg-background px-2 py-1 text-foreground";
   return (
-    <>
+    <div className="[--app-h:calc(100dvh-3.5rem)] sm:[--app-h:calc(100dvh-2.25rem)]">
       {ready && <Outlet />}
-      <div className="fixed inset-x-0 bottom-0 z-[100] flex flex-wrap items-center justify-center gap-x-4 gap-y-1 bg-foreground px-3 py-2 text-xs font-semibold text-background">
+      <div className="flex h-14 flex-wrap sm:h-9 sm:flex-nowrap items-center justify-center gap-x-4 gap-y-1 overflow-hidden bg-foreground px-3 py-1 text-xs font-semibold text-background">
         <span>DEMO: nothing is saved. Admin password: {DEMO_PASSWORD}</span>
         <label className="flex items-center gap-1">
           Clock
@@ -57,6 +57,6 @@ function DemoLayout() {
           </select>
         )}
       </div>
-    </>
+    </div>
   );
 }

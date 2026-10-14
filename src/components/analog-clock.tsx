@@ -1,7 +1,15 @@
 import { handAngles } from "@/lib/frames";
 
 // Flat analog clock with 1-12 numerals; hands show the exact time, and the second hand ticks every second.
-export function AnalogClock({ minutes, size = 240 }: { minutes: number; size?: number }) {
+export function AnalogClock({
+  minutes,
+  size = 240,
+  className = "",
+}: {
+  minutes: number;
+  size?: number;
+  className?: string;
+}) {
   const { hour, minute, second } = handAngles(minutes);
   return (
     <svg
@@ -10,7 +18,7 @@ export function AnalogClock({ minutes, size = 240 }: { minutes: number; size?: n
       width={size}
       height={size}
       viewBox="0 0 200 200"
-      className="shrink-0"
+      className={`shrink-0 ${className}`}
     >
       <circle
         cx="100"
