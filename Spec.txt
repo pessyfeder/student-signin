@@ -3,9 +3,9 @@ Web app
 
 sign-in app for three students: 
 
-Hindy Fisch
-Mindy Katina
-Esty Oberlander
+Rivka Stein
+Miriam Gold
+Leah Weiss
 
 sign-in timings: 
 1. Arrival (Good Morning) 10:00 -> 10:15

@@ -150,6 +150,11 @@ export function SignInPage({
           </section>
 
           <div className="min-h-0 w-full max-w-4xl grid grid-cols-2 sm:grid-cols-3 gap-[1.5vh] overflow-y-auto">
+            {students.length === 0 && (
+              <p className="col-span-full text-center text-[min(2.8vh,4.5vw)] font-bold">
+                No students yet. A teacher can add them in Admin.
+              </p>
+            )}
             {students.map((s) => {
               const rec = records[key(s)];
               return (

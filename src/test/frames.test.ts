@@ -86,20 +86,20 @@ describe("handAngles", () => {
 });
 
 describe("displayName", () => {
-  const roster = ["Hindy Fisch", "Mindy Katina", "Esty Oberlander"];
+  const roster = ["Rivka Stein", "Miriam Gold", "Leah Weiss"];
   it("uses the first name when it is unique", () => {
-    expect(displayName("Hindy Fisch", roster)).toBe("Hindy");
+    expect(displayName("Rivka Stein", roster)).toBe("Rivka");
   });
   it("adds the surname initial when a first name is shared", () => {
-    const r = ["Rivka Fisch", "Rivka Katina", "Esty Oberlander"];
-    expect(displayName("Rivka Fisch", r)).toBe("Rivka F.");
-    expect(displayName("Rivka Katina", r)).toBe("Rivka K.");
-    expect(displayName("Esty Oberlander", r)).toBe("Esty");
+    const r = ["Rivka Stein", "Rivka Gold", "Leah Weiss"];
+    expect(displayName("Rivka Stein", r)).toBe("Rivka S.");
+    expect(displayName("Rivka Gold", r)).toBe("Rivka G.");
+    expect(displayName("Leah Weiss", r)).toBe("Leah");
   });
   it("uses the full name when first name and initial are both shared", () => {
-    const r = ["Rivka Fisch", "Rivka Friedman", "Esty Oberlander"];
-    expect(displayName("Rivka Fisch", r)).toBe("Rivka Fisch");
-    expect(displayName("Rivka Friedman", r)).toBe("Rivka Friedman");
+    const r = ["Rivka Stein", "Rivka Samuels", "Leah Weiss"];
+    expect(displayName("Rivka Stein", r)).toBe("Rivka Stein");
+    expect(displayName("Rivka Samuels", r)).toBe("Rivka Samuels");
   });
 });
 
@@ -116,13 +116,13 @@ describe("isUnlocked", () => {
 describe("recordsToCsv", () => {
   it("writes one row per sign-in with a header", () => {
     const csv = recordsToCsv({
-      "Mon Oct 12 2026|arrival|Hindy Fisch": {
+      "Mon Oct 12 2026|arrival|Rivka Stein": {
         text: "",
         late: false,
         at: "10:07 AM",
         status: "early",
       },
-      "Mon Oct 12 2026|recess|Esty Oberlander": {
+      "Mon Oct 12 2026|recess|Leah Weiss": {
         text: "",
         late: true,
         at: "11:40 AM",
@@ -131,8 +131,8 @@ describe("recordsToCsv", () => {
     });
     expect(csv).toBe(
       "Date,Window,Student,Time,Status\n" +
-        "2026-10-12,Good Morning,Hindy Fisch,10:07 AM,early\n" +
-        "2026-10-12,After Yiddish Recess,Esty Oberlander,11:40 AM,late\n",
+        "2026-10-12,Good Morning,Rivka Stein,10:07 AM,early\n" +
+        "2026-10-12,After Yiddish Recess,Leah Weiss,11:40 AM,late\n",
     );
   });
 });
@@ -167,13 +167,13 @@ describe("weekly earliest arrival", () => {
   it("keeps the arrival furthest before the end time", () => {
     const rec = (at: string) => ({ text: "", late: false, at });
     const records = {
-      "Mon Oct 12 2026|arrival|Hindy": rec("10:10 AM"),
-      "Tue Oct 13 2026|arrival|Hindy": rec("10:02 AM"),
-      "Wed Oct 14 2026|arrival|Hindy": rec("10:20 AM"),
+      "Mon Oct 12 2026|arrival|Rivka": rec("10:10 AM"),
+      "Tue Oct 13 2026|arrival|Rivka": rec("10:02 AM"),
+      "Wed Oct 14 2026|arrival|Rivka": rec("10:20 AM"),
     };
     const [row] = earliestArrivals(
       records,
-      ["Hindy"],
+      ["Rivka"],
       ["Mon Oct 12 2026", "Tue Oct 13 2026", "Wed Oct 14 2026"],
     );
     expect(row?.cells[0]).toEqual({ at: "10:02 AM", before: 13 });

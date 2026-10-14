@@ -1,6 +1,5 @@
 import {
   PERIODS,
-  STUDENTS,
   clockLabel,
   displayName,
   evaluateSignIn,
@@ -10,6 +9,9 @@ import {
 } from "@/lib/frames";
 
 export const DEMO_PASSWORD = "demo";
+
+// Made-up names for the demo only.
+const DEMO_STUDENTS = ["Rivka Stein", "Miriam Gold", "Leah Weiss"];
 
 // A Storage that lives only in memory, so the demo never saves anything.
 function memoryStorage(): Storage {
@@ -35,7 +37,7 @@ const dateAt = (m: number) => {
 function makeRecord(name: string, p: Period, m: number): SignIn {
   const r = evaluateSignIn(p, m);
   return {
-    text: `${p.greet}, ${displayName(name, STUDENTS)}! ${r.detail}.`,
+    text: `${p.greet}, ${displayName(name, DEMO_STUDENTS)}! ${r.detail}.`,
     late: r.late,
     at: clockLabel(dateAt(m)),
     status: r.status,
@@ -57,7 +59,7 @@ function sampleRecords() {
     if (d.getDay() === 6) continue;
     made += 1;
     PERIODS.forEach((p, pi) =>
-      STUDENTS.forEach((s, si) => {
+      DEMO_STUDENTS.forEach((s, si) => {
         const roll = (made * 7 + pi * 3 + si * 5) % 10;
         if (roll === 0) return;
         const m = roll < 5 ? p.start + (roll % 3) : roll < 8 ? p.end + 0.5 : p.end + 1 + (roll % 4);
@@ -76,6 +78,7 @@ export function installDemoStorage() {
     session: Object.getOwnPropertyDescriptor(window, "sessionStorage"),
   };
   const local = memoryStorage();
+  local.setItem("signin-students", JSON.stringify(DEMO_STUDENTS));
   local.setItem("signin-records", JSON.stringify(sampleRecords()));
   void hashPassword(DEMO_PASSWORD).then((h) => local.setItem("signin-pw", h));
   Object.defineProperty(window, "localStorage", { value: local, configurable: true });

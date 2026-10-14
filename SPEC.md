@@ -22,7 +22,7 @@ Project Spark is a web app for classroom sign-in. Three students sign in at fixe
 
 | User | Description | Needs |
 |---|---|---|
-| Student (3) | Hindy Fisch, Mindy Katina, Esty Oberlander | Large, obvious button; clear feedback on whether they were on time |
+| Student (3) | Rivka Stein, Miriam Gold, Leah Weiss | Large, obvious button; clear feedback on whether they were on time |
 | Teacher | Runs the class and owns the device | Enable or disable sign-in; see attendance; keep students from changing settings |
 
 ## 4. Sign-in windows
@@ -59,9 +59,9 @@ Window definitions live in a single configuration object rather than being scatt
 Format: `"<Greeting>, <Student Name>! You signed in <N> min <early|late>."`
 
 Examples:
-- `Good Morning, Hindy Fisch! You signed in 3 min early.` (green)
-- `Good day, Mindy Katina! You signed in 2 min late.` (red)
-- `Good Afternoon, Esty Oberlander! You signed in right on time.` (green)
+- `Good Morning, Rivka Stein! You signed in 3 min early.` (green)
+- `Good day, Miriam Gold! You signed in 2 min late.` (red)
+- `Good Afternoon, Leah Weiss! You signed in right on time.` (green)
 
 The greeting follows the window (§4). The message stays visible for a few seconds, then the screen returns to its normal state.
 
@@ -101,7 +101,7 @@ Each sign-in stores: student, window, timestamp, status (`early | on_time | late
 - [ ] Cleaner look, no moving elements
 
 ## 9. Acceptance criteria
-1. At 10:07 tapping "Hindy Fisch" shows a green "Good Morning, Hindy Fisch!" message with the on-time or early wording, and one record is saved.
+1. At 10:07 tapping "Rivka Stein" shows a green "Good Morning, Rivka Stein!" message with the on-time or early wording, and one record is saved.
 2. At 10:20 the same tap shows a red message with "5 min late".
 3. At 11:28 the buttons and message are green again, and the greeting is "Good day".
 4. A second tap in the same window does not create a second record.

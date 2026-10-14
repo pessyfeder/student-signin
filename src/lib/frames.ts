@@ -22,11 +22,12 @@ export type SignIn = {
   detail?: string;
 };
 
-export const STUDENTS = ["Hindy Fisch", "Mindy Katina", "Esty Oberlander"];
+// No built-in students: the teacher adds the class list in the Admin area on the device.
+export const STUDENTS: string[] = [];
 
 const STUDENTS_KEY = "signin-students";
 
-// The class list: the built-in students plus any the teacher has added in this browser.
+// The class list: the students the teacher has added in this browser.
 export function loadStudents(): string[] {
   try {
     const saved = JSON.parse(localStorage.getItem(STUDENTS_KEY) || "null");
