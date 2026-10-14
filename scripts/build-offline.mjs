@@ -59,13 +59,32 @@ self.addEventListener("fetch", (e) => {
 `,
 );
 
-cpSync("scripts/offline-server.mjs", join(out, "server.mjs"));
+cpSync("scripts/offline-server.ps1", join(out, "server.ps1"));
+// Windows batch files and text files want CRLF line endings.
+const crlf = (lines) => lines.join("\r\n") + "\r\n";
 writeFileSync(
   join(out, "Start Sign-In.bat"),
-  `@echo off\r\ncd /d "%~dp0"\r\nnode server.mjs\r\nif errorlevel 1 (\r\n  echo.\r\n  echo Could not start. Is Node.js installed? Get it from https://nodejs.org\r\n  pause\r\n)\r\n`,
+  crlf([
+    "@echo off",
+    'cd /d "%~dp0"',
+    'powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0server.ps1"',
+    "if errorlevel 1 pause",
+  ]),
 );
 writeFileSync(
   join(out, "README.txt"),
-  `Class Sign-In (offline)\r\n\r\n1. Install Node.js (LTS) once from https://nodejs.org. No internet is needed after that.\r\n2. Double-click "Start Sign-In.bat". The app opens at http://localhost:4173\r\n3. Always use that same address and the same browser: the records live in that browser.\r\n4. In Chrome or Edge, use the install icon in the address bar (or menu > Install) to add it\r\n   as an app. After the first visit it also works with the server stopped.\r\n5. Use the Backup tab in Admin regularly.\r\n`,
+  crlf([
+    "Class Sign-In (offline)",
+    "",
+    "Nothing needs to be installed. Windows 10 or 11 is enough.",
+    "",
+    '1. Double-click "Start Sign-In.bat". A window opens and the app opens in your browser',
+    "   at http://localhost:4173",
+    "2. Leave that window open (minimize it). Closing it stops the app.",
+    "3. Always use that same address and the same browser: the records live in that browser.",
+    "4. In Chrome or Edge, use the install icon in the address bar (or menu > Install) to add",
+    "   it as an app.",
+    "5. Use the Backup tab in Admin regularly.",
+  ]),
 );
 console.log(`\nOffline build ready in ./${out} (cache ${version})`);
