@@ -11,6 +11,7 @@ import {
   recordStatus,
   weekStart,
   windowLabel,
+  type CustomTimes,
   type SignIn,
   type Status,
 } from "@/lib/frames";
@@ -54,9 +55,11 @@ const cell = "border border-border px-4 py-3 align-top";
 export function AdminAttendance({
   records,
   students,
+  custom = {},
 }: {
   records: { [k: string]: SignIn };
   students: string[];
+  custom?: CustomTimes;
 }) {
   const days = useMemo(() => buildAttendance(records, students), [records, students]);
 
@@ -203,6 +206,7 @@ export function AdminAttendance({
                       records,
                       students,
                       w.days.map((d) => d.day),
+                      custom,
                     ).map((row) => (
                       <tr key={row.student}>
                         <th scope="row" className={`${cell} font-bold`}>

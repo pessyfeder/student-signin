@@ -15,10 +15,14 @@ import {
   displayName,
   evaluateSignIn,
   nextPeriod,
+  loadCustomTimes,
   loadRecords,
+  periodsFor,
   loadStudents,
   mins,
   saveRecords,
+  type CustomTimes,
+  type Period,
   type SignIn,
 } from "@/lib/frames";
 
@@ -52,11 +56,13 @@ export function SignInPage({
   const [msg, setMsg] = useState<SignIn | null>(null);
   const [students, setStudents] = useState<string[]>([]);
   const [locked, setLocked] = useState(false);
+  const [custom, setCustom] = useState<CustomTimes>({});
 
   useEffect(() => {
     setNow(getNow());
     setStudents(loadStudents());
     setRecords(loadRecords());
+    setCustom(loadCustomTimes());
     setLocked(isSignInLocked());
     const t = setInterval(() => {
       setNow(getNow());
@@ -72,11 +78,12 @@ export function SignInPage({
   const upcoming = nextPeriod(n);
   const tone = TONES[(period ?? upcoming ?? PERIODS[0]!).tone];
   const isLate = period ? evaluateSignIn(period, n).late : false;
-  const open = !!period;
   const day = now.toDateString();
-  const key = (s: string) => `${day}|${period?.id}|${s}`;
+  // A student with custom times has their own window; the header shows the default schedule.
+  const windowFor = (s: string) => (locked ? null : currentPeriod(n, periodsFor(s, custom)));
+  const key = (s: string, p: Period) => `${day}|${p.id}|${s}`;
 
-  function signIn(name: string) {
+  function signIn(name: string, period: Period | null) {
     if (!period || !now) return;
     const r = evaluateSignIn(period, n);
     const rec: SignIn = {
@@ -90,8 +97,8 @@ export function SignInPage({
     };
     // Read the latest saved records so quick taps by different students don't overwrite each other.
     const saved = loadRecords();
-    if (saved[key(name)]) return;
-    const next = { ...saved, [key(name)]: rec };
+    if (saved[key(name, period)]) return;
+    const next = { ...saved, [key(name, period)]: rec };
     setRecords(next);
     saveRecords(next);
     setMsg(rec);
@@ -156,12 +163,13 @@ export function SignInPage({
               </p>
             )}
             {students.map((s) => {
-              const rec = records[key(s)];
+              const own = windowFor(s);
+              const rec = own ? records[key(s, own)] : undefined;
               return (
                 <button
                   key={s}
-                  disabled={!open || !!rec}
-                  onClick={() => signIn(s)}
+                  disabled={!own || !!rec}
+                  onClick={() => signIn(s, own)}
                   className="rounded-2xl px-4 py-[1.5vh] text-[min(2.8vh,4.5vw)] font-bold disabled:opacity-50 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-ring border-4 border-frame bg-early text-early-foreground"
                 >
                   {s}

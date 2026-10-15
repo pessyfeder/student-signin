@@ -194,3 +194,23 @@ describe("addStudent name rules", () => {
       expect(addStudent([], n)).toHaveProperty("error");
   });
 });
+
+describe("custom arrival times", () => {
+  it("overrides only the chosen student's window", async () => {
+    const { periodsFor, setCustomTimes, currentPeriod: cp } = await import("@/lib/frames");
+    const custom = setCustomTimes({}, ["Dina"], "arrival", { start: 630, end: 645 });
+    expect(cp(t(10, 35), periodsFor("Dina", custom))?.id).toBe("arrival");
+    expect(cp(t(10, 35), periodsFor("Other", custom))).toBeNull();
+    expect(setCustomTimes(custom, ["Dina"], "arrival", null)).toEqual({});
+  });
+});
+
+describe("time input parsing", () => {
+  it("reads HH:MM values", async () => {
+    const { parseTimeInput, toTimeInput } = await import("@/lib/frames");
+    expect(parseTimeInput("10:30")).toBe(630);
+    expect(parseTimeInput("10:30:00")).toBe(630);
+    expect(parseTimeInput("")).toBeNull();
+    expect(toTimeInput(630)).toBe("10:30");
+  });
+});

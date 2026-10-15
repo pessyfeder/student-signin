@@ -2,6 +2,7 @@ import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { DEMO_ONLY } from "@/lib/demo-config";
 import { useEffect, useState, type FormEvent } from "react";
 import { AdminAttendance } from "@/components/admin-attendance";
+import { AdminCustomTimes } from "@/components/admin-custom-times";
 import { AdminBackup } from "@/components/admin-backup";
 import { AdminPassword } from "@/components/admin-password";
 import { AdminStudents } from "@/components/admin-students";
@@ -10,9 +11,11 @@ import {
   hashPassword,
   isUnlocked,
   loadArchived,
+  loadCustomTimes,
   loadRecords,
   loadStudents,
   setSignInLocked,
+  type CustomTimes,
   type SignIn,
 } from "@/lib/frames";
 
@@ -29,11 +32,12 @@ export const Route = createFileRoute("/admin")({
   component: () => <Admin />,
 });
 
-type Tab = "attendance" | "students" | "backup" | "password";
+type Tab = "attendance" | "students" | "times" | "backup" | "password";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "attendance", label: "View Attendance" },
   { id: "students", label: "Add Student" },
+  { id: "times", label: "Custom Times" },
   { id: "backup", label: "Backup" },
   { id: "password", label: "Change Password" },
 ];
@@ -47,6 +51,7 @@ export function Admin({ backTo = "/" }: { backTo?: "/" | "/demo" }) {
   const [records, setRecords] = useState<{ [k: string]: SignIn }>({});
   const [students, setStudents] = useState<string[]>([]);
   const [archived, setArchived] = useState<string[]>([]);
+  const [custom, setCustom] = useState<CustomTimes>({});
   const [due, setDue] = useState(false);
 
   useEffect(() => {
@@ -62,6 +67,7 @@ export function Admin({ backTo = "/" }: { backTo?: "/" | "/demo" }) {
     setRecords(loadRecords());
     setStudents(loadStudents());
     setArchived(loadArchived());
+    setCustom(loadCustomTimes());
     setDue(backupDue());
     const touch = () => sessionStorage.setItem("teacher-ok", String(Date.now()));
     const check = () => {
@@ -188,7 +194,7 @@ export function Admin({ backTo = "/" }: { backTo?: "/" | "/demo" }) {
             </div>
           )}
           {!ok ? null : tab === "attendance" ? (
-            <AdminAttendance records={records} students={students} />
+            <AdminAttendance records={records} students={students} custom={custom} />
           ) : tab === "students" ? (
             <AdminStudents
               students={students}
@@ -198,6 +204,8 @@ export function Admin({ backTo = "/" }: { backTo?: "/" | "/demo" }) {
                 setArchived(a);
               }}
             />
+          ) : tab === "times" ? (
+            <AdminCustomTimes students={students} custom={custom} onChange={setCustom} />
           ) : tab === "password" ? (
             <AdminPassword />
           ) : (

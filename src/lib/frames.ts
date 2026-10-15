@@ -160,13 +160,72 @@ export const LATE_GRACE = 10;
 // The window open for sign-in right now: from its start through the whole minute that is
 // LATE_GRACE minutes after its end (10:25:59 still counts for a 10:15 end). Sign-ins after the end
 // minute are late. Between windows, and after the last one, there is none.
-export function currentPeriod(now: number): Period | null {
-  return PERIODS.find((x) => now >= x.start && now < x.end + LATE_GRACE + 1) ?? null;
+export function currentPeriod(now: number, periods: Period[] = PERIODS): Period | null {
+  return periods.find((x) => now >= x.start && now < x.end + LATE_GRACE + 1) ?? null;
 }
 
-export function nextPeriod(now: number): Period | null {
-  return PERIODS.find((x) => x.start > now) ?? null;
+export function nextPeriod(now: number, periods: Period[] = PERIODS): Period | null {
+  return periods.find((x) => x.start > now) ?? null;
 }
+
+const CUSTOM_TIMES_KEY = "signin-custom-times";
+
+export type TimeWindow = { start: number; end: number };
+
+// Custom arrival times the admin sets for specific students: student -> window id -> start/end
+// (minutes since midnight). Anyone without an entry follows the default PERIODS.
+export type CustomTimes = { [student: string]: { [periodId: string]: TimeWindow } };
+
+export function loadCustomTimes(): CustomTimes {
+  try {
+    const saved = JSON.parse(localStorage.getItem(CUSTOM_TIMES_KEY) || "{}");
+    if (saved && typeof saved === "object" && !Array.isArray(saved)) return saved;
+  } catch {
+    // fall through
+  }
+  return {};
+}
+
+export function saveCustomTimes(c: CustomTimes) {
+  localStorage.setItem(CUSTOM_TIMES_KEY, JSON.stringify(c));
+}
+
+// The student's windows: the defaults with any custom start/end times swapped in.
+export function periodsFor(student: string, custom: CustomTimes): Period[] {
+  const mine = custom[student];
+  if (!mine) return PERIODS;
+  return PERIODS.map((p) => (mine[p.id] ? { ...p, ...mine[p.id] } : p));
+}
+
+// Sets (or, with a null window, clears) one window's custom times for each of the students.
+export function setCustomTimes(
+  custom: CustomTimes,
+  students: string[],
+  periodId: string,
+  win: TimeWindow | null,
+): CustomTimes {
+  const next: CustomTimes = { ...custom };
+  for (const s of students) {
+    const rest = { ...(next[s] ?? {}) };
+    delete rest[periodId];
+    const mine = win ? { ...rest, [periodId]: win } : rest;
+    if (Object.keys(mine).length) next[s] = mine;
+    else delete next[s];
+  }
+  return next;
+}
+
+// "HH:MM" (from a time input) to minutes since midnight, and back.
+export function parseTimeInput(v: string): number | null {
+  const m = /^(\d{2}):(\d{2})(?::\d{2})?$/.exec(v);
+  if (!m) return null;
+  const h = Number(m[1]);
+  const mm = Number(m[2]);
+  return h < 24 && mm < 60 ? h * 60 + mm : null;
+}
+
+export const toTimeInput = (m: number) =>
+  `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
 
 export type Result = { status: Status; minutes: number; late: boolean; detail: string };
 
@@ -415,10 +474,11 @@ export function earliestArrivals(
   records: { [k: string]: SignIn },
   students: string[],
   days: string[],
+  custom: CustomTimes = {},
 ): { student: string; cells: EarliestCell[] }[] {
   return students.map((student) => ({
     student,
-    cells: PERIODS.map((period) => {
+    cells: periodsFor(student, custom).map((period) => {
       let best: EarliestCell = null;
       for (const day of days) {
         const rec = records[`${day}|${period.id}|${student}`];
