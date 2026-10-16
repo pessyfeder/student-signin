@@ -160,6 +160,12 @@ export const LATE_GRACE = 10;
 // The window open for sign-in right now: from its start through the whole minute that is
 // LATE_GRACE minutes after its end (10:25:59 still counts for a 10:15 end). Sign-ins after the end
 // minute are late. Between windows, and after the last one, there is none.
+// Sign-in runs Monday to Thursday only.
+export function isSignInDay(date: Date): boolean {
+  const d = date.getDay();
+  return d >= 1 && d <= 4;
+}
+
 export function currentPeriod(now: number, periods: Period[] = PERIODS): Period | null {
   return periods.find((x) => now >= x.start && now < x.end + LATE_GRACE + 1) ?? null;
 }

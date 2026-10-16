@@ -12,6 +12,7 @@ import {
   fmt,
   currentPeriod,
   isSignInLocked,
+  isSignInDay,
   displayName,
   evaluateSignIn,
   nextPeriod,
@@ -74,13 +75,15 @@ export function SignInPage({
   if (!now) return null;
   const n = mins(now);
   // The teacher's Lock button closes sign-in regardless of the schedule.
-  const period = locked ? null : currentPeriod(n);
-  const upcoming = nextPeriod(n);
+  const offDay = !isSignInDay(now);
+  const closed = locked || offDay;
+  const period = closed ? null : currentPeriod(n);
+  const upcoming = offDay ? null : nextPeriod(n);
   const tone = TONES[(period ?? upcoming ?? PERIODS[0]!).tone];
   const isLate = period ? evaluateSignIn(period, n).late : false;
   const day = now.toDateString();
   // A student with custom times has their own window; the header shows the default schedule.
-  const windowFor = (s: string) => (locked ? null : currentPeriod(n, periodsFor(s, custom)));
+  const windowFor = (s: string) => (closed ? null : currentPeriod(n, periodsFor(s, custom)));
   const key = (s: string, p: Period) => `${day}|${p.id}|${s}`;
 
   function signIn(name: string, period: Period | null) {
@@ -148,9 +151,11 @@ export function SignInPage({
                 ? isLate
                   ? `Late sign-in until ${fmt(period.end + LATE_GRACE)}`
                   : `Sign-in closes at ${fmt(period.end)}`
-                : locked
-                  ? "Sign-in is locked by the teacher"
-                  : upcoming
+                : offDay
+                  ? "Sign-in is open Monday to Thursday"
+                  : locked
+                    ? "Sign-in is locked by the teacher"
+                    : upcoming
                     ? `Sign-in opens at ${fmt(upcoming.start)}`
                     : "Sign-in is closed"}
             </p>
