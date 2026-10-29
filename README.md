@@ -26,4 +26,4 @@ Built with Vite, React 19, TanStack Router and Tailwind 4 as a plain static site
 
 ## Hosting
 
-Upload `dist` (from `npm run build`) to any static host; the build adds `404.html` and `_redirects` so deep links like `/admin` work. For a sub-path such as GitHub Pages, build with `VITE_BASE=/project-spark/ npm run build`; `.github/workflows/pages.yml` does this on every push to `main`. `npm run build:offline` makes the single-device package in `./offline`.
+Upload `dist` (from `npm run build`) to any static host; the build adds `404.html` and `_redirects` so deep links like `/admin` work. For a sub-path such as GitHub Pages, build with `VITE_BASE=/student-signin/ npm run build`; `.github/workflows/pages.yml` does this on every push to `main`. `npm run build:offline` makes the single-device package in `./offline`.
