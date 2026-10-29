@@ -1,6 +1,6 @@
 # Project Spark — Product Specification
 
-**Status:** Draft v1 · **Source:** `Spec.txt` (original notes) · **Stack:** TanStack Start, React 19, Tailwind 4, shadcn/Radix UI (see `package.json`)
+**Status:** Draft v1 · **Source:** `Spec.txt` (original notes) · **Stack:** Vite, TanStack Router, React 19, Tailwind 4, shadcn/Radix UI (see `package.json`)
 
 ## 1. Overview
 

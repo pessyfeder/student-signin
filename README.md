@@ -22,4 +22,8 @@ npm test         # unit tests
 npm run build
 ```
 
-Built with TanStack Start, React 19 and Tailwind 4, and connected to [Lovable](https://lovable.dev/projects/d508c791-9fb2-4212-b456-aa6e51caea4f): commits pushed to `main` sync back into the Lovable editor.
+Built with Vite, React 19, TanStack Router and Tailwind 4 as a plain static site: no server and no Lovable dependency.
+
+## Hosting
+
+Upload `dist` (from `npm run build`) to any static host; the build adds `404.html` and `_redirects` so deep links like `/admin` work. For a sub-path such as GitHub Pages, build with `VITE_BASE=/project-spark/ npm run build`; `.github/workflows/pages.yml` does this on every push to `main`. `npm run build:offline` makes the single-device package in `./offline`.

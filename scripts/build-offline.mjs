@@ -17,16 +17,16 @@ try {
   );
   process.exit(1);
 }
-execSync("npx vite build", {
+execSync("npm run build", {
   stdio: "inherit",
-  env: { ...process.env, OFFLINE_BUILD: "1", VITE_OFFLINE_BUILD: "1" },
+  env: { ...process.env, VITE_OFFLINE_BUILD: "1" },
 });
 
 const app = join(out, "app");
 mkdirSync(out, { recursive: true });
-cpSync(".output/public", app, { recursive: true });
-renameSync(join(app, "_shell.html"), join(app, "index.html"));
-if (existsSync(join(app, "_headers"))) rmSync(join(app, "_headers"));
+cpSync("dist", app, { recursive: true });
+// The local server already falls back to index.html; these are for static hosts only.
+for (const f of ["404.html", "_redirects"]) rmSync(join(app, f), { force: true });
 
 const files = [];
 (function walk(dir) {
